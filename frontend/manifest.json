@@ -1,7 +1,7 @@
 {
   "name": "Stock Check",
   "short_name": "StockCheck",
-  "description": "Request, check, and report stock — with Messenger delivery.",
+  "description": "Request, check, and report stock.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

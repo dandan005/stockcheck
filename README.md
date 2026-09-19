@@ -13,10 +13,9 @@ frontend/
     BarcodeScanner.jsx    — live barcode/QR scanning via html5-qrcode
 
 backend/
-  server.js            — Express app: Messenger webhook, Send API, report generation
-  storage.js           — uploads generated reports to Firebase Storage, returns a URL
+  server.js            — Express app: report generation (POST /api/reports returns an .xlsx)
   package.json
-  .env.example         — copy to .env and fill in your Meta + Firebase credentials
+  .env.example         — copy to .env
 ```
 
 ## Setup
@@ -24,19 +23,12 @@ backend/
 **Backend**
 ```bash
 cd backend
-cp .env.example .env   # fill in PAGE_ACCESS_TOKEN, VERIFY_TOKEN, APP_SECRET
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-You'll need to:
-1. Create a Meta Developer App + connect a Facebook Page.
-2. Generate a Page Access Token (Meta for Developers → Messenger → Settings).
-3. Set your webhook URL (e.g. via ngrok in dev) and VERIFY_TOKEN to match `.env`.
-4. Subscribe your Page to `messages` and `messaging_postbacks` webhook fields.
-5. Create a Firebase project, enable Storage, generate a service account key
-   (Project Settings → Service Accounts → Generate new private key), and point
-   `FIREBASE_SERVICE_ACCOUNT_PATH` (or `_JSON`) and `FIREBASE_STORAGE_BUCKET` at it.
+Test it: `curl http://localhost:4000/health`
 
 **Frontend**
 Drop the `frontend/` contents into your React/Vue project:
@@ -53,10 +45,9 @@ Call `registerServiceWorker()` from your app's entry file, and import
 `OcrScanner` / `BarcodeScanner` from `components/` into your Stock Check screen.
 
 ## Not yet implemented (next steps)
-- Auth (Firebase Auth or custom JWT)
+- Auth (Supabase Auth or custom JWT)
 - Database models (see the data model discussed earlier: users, items,
   stock_check_requests, stock_checks, reports, discrepancies)
 - Offline queue with IndexedDB (Dexie.js) tied to the service worker's sync event
-- Linking a user account to their Messenger PSID (captured in the webhook handler)
 - Wiring `OcrScanner`/`BarcodeScanner` output into the stock check form and
   matching scanned SKUs against the `items` table

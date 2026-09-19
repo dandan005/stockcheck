@@ -1,0 +1,4 @@
+node_modules/
+.env
+ngrok.tgz
+ngrok_log.txt

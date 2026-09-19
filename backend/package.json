@@ -1,7 +1,7 @@
 {
   "name": "stockcheck-backend",
   "version": "1.0.0",
-  "description": "Backend for the Stock Check PWA: auth, checks, report generation, Messenger delivery.",
+  "description": "Backend for the Stock Check PWA: auth, checks, report generation.",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -13,8 +13,6 @@
     "dotenv": "^16.4.5",
     "cors": "^2.8.5",
     "exceljs": "^4.4.0",
-    "multer": "^1.4.5-lts.1",
-    "node-fetch": "^3.3.2",
-    "firebase-admin": "^12.3.0"
+    "multer": "^1.4.5-lts.1"
   }
 }
