@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import SyncStatus from "../components/SyncStatus.jsx";
 import AuthGate from "../components/AuthGate.jsx";
 import ItemsScreen from "../components/ItemsScreen.jsx";
 import RequestsScreen from "../components/RequestsScreen.jsx";
@@ -34,6 +35,7 @@ export default function App() {
     <AuthGate>
       <main style={{ padding: 16, minHeight: "100vh", background: "#0f172a", color: "#f8fafc" }}>
         <h1>Stock Check</h1>
+        <SyncStatus />
         {user && <p style={{ color: "#94a3b8" }}>{user.fullName || user.email} — {user.role}</p>}
 
         {countRequest ? (

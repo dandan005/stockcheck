@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { enqueueCheck, flushQueue } from "./offlineQueue";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -56,7 +57,7 @@ export async function getChecksForRequest(requestId) {
   return (await apiFetch(`/api/requests/${requestId}/checks`)).json();
 }
 
-export async function submitCheck(check) {
+async function sendCheck(check) {
   return (await apiFetch("/api/checks", {
     method: "POST",
     body: JSON.stringify(check),
@@ -99,4 +100,20 @@ export async function downloadReport(checkData) {
   a.download = file.name;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+export async function submitCheck(check) {
+  try {
+    return await sendCheck(check);
+  } catch (err) {
+    // TypeError = fetch never reached the server (offline / backend down)
+    if (err instanceof TypeError || !navigator.onLine) {
+      await enqueueCheck(check);
+      return { ...check, queued: true };
+    }
+    throw err;
+  }
+}
+
+export function syncPending() {
+  return flushQueue(sendCheck);
 }
