@@ -51,3 +51,18 @@ export function usePendingCount() {
   }, []);
   return n;
 }
+export function usePendingChecks() {
+  const [rows, setRows] = useState([]);
+  useEffect(() => {
+    const refresh = () =>
+      db.pendingChecks
+        .orderBy("queuedAt")
+        .toArray()
+        .then((r) => setRows(r.map((x) => x.check)))
+        .catch(() => {});
+    refresh();
+    window.addEventListener("pending-changed", refresh);
+    return () => window.removeEventListener("pending-changed", refresh);
+  }, []);
+  return rows;
+}

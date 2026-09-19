@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getItems, submitCheck, getChecksForRequest } from "../lib/api.js";
 import BarcodeScanner from "./BarcodeScanner.jsx";
+import { usePendingChecks } from "../lib/offlineQueue.js";
 
 export default function CountScreen({ request, onBack }) {
   const [items, setItems] = useState([]);
@@ -10,6 +11,7 @@ export default function CountScreen({ request, onBack }) {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const pending = usePendingChecks().filter((p) => p.requestId === request.id);
 
   async function load() {
     try {
@@ -20,13 +22,13 @@ export default function CountScreen({ request, onBack }) {
       setItems(allItems);
       setChecks(existingChecks);
     } catch (err) {
-      setError(err.message);
+      if (!(err instanceof TypeError)) setError(err.message);
     }
   }
 
   useEffect(() => {
     load();
-  }, []);
+  }, [pending.length]);
 
   function handleScan(code) {
     setScannerOpen(false);
@@ -108,8 +110,22 @@ export default function CountScreen({ request, onBack }) {
 
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
 
-      <h3>Counted so far ({checks.length})</h3>
-      {checks.length === 0 ? (
+      <h3>Counted so far ({checks.length + pending.length})</h3>
+{pending.length > 0 && (
+        <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          {pending.map((p) => {
+            const it = items.find((x) => x.id === p.itemId);
+            const variance = it ? p.countedQty - it.expected_qty : null;
+            return (
+              <li key={p.itemId} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b", color: "#fde68a" }}>
+                ⏳ <strong>{it?.sku ?? "item"}</strong> — {it?.name}: counted {p.countedQty}
+                {variance !== null && variance !== 0 && ` (variance ${variance})`} — waiting to sync
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {checks.length === 0 && pending.length === 0 ? (
         <p>Nothing counted yet.</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
