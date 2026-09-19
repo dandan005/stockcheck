@@ -224,4 +224,50 @@ app.put("/api/requests/:id", requireAuth, async (req, res) => {
   res.json(data);
 });
 
+/* ------------------------------------------------------------------ */
+/* Stock checks (the actual item counts against a request)            */
+/* ------------------------------------------------------------------ */
+
+app.get("/api/requests/:id/checks", requireAuth, async (req, res) => {
+  const { data, error } = await req.supabase
+    .from("stock_checks")
+    .select("*, items(sku, name, location)")
+    .eq("request_id", req.params.id)
+    .order("checked_at", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post("/api/checks", requireAuth, async (req, res) => {
+  const { requestId, itemId, countedQty, method } = req.body;
+  if (!requestId || !itemId || countedQty === undefined) {
+    return res.status(400).json({ error: "requestId, itemId and countedQty are required" });
+  }
+
+  const { data: item, error: itemErr } = await req.supabase
+    .from("items")
+    .select("expected_qty")
+    .eq("id", itemId)
+    .single();
+  if (itemErr) return res.status(400).json({ error: "Item not found" });
+
+  const { data, error } = await req.supabase
+    .from("stock_checks")
+    .upsert(
+      {
+        request_id: requestId,
+        item_id: itemId,
+        checked_by: req.user.id,
+        expected_qty: item.expected_qty,
+        counted_qty: Number(countedQty),
+        method: method || "manual",
+      },
+      { onConflict: "request_id,item_id" }
+    )
+    .select()
+    .single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.status(201).json(data);
+});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

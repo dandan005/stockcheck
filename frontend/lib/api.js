@@ -52,6 +52,17 @@ export async function updateRequest(id, patch) {
   })).json();
 }
 
+export async function getChecksForRequest(requestId) {
+  return (await apiFetch(`/api/requests/${requestId}/checks`)).json();
+}
+
+export async function submitCheck(check) {
+  return (await apiFetch("/api/checks", {
+    method: "POST",
+    body: JSON.stringify(check),
+  })).json();
+}
+
 export async function getItems() {
   return (await apiFetch("/api/items")).json();
 }

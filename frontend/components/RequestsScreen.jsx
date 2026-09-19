@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getRequests, createRequest, updateRequest, getUsers } from "../lib/api.js";
 
-export default function RequestsScreen({ user }) {
+export default function RequestsScreen({ user, onOpenCount }) {
   const [requests, setRequests] = useState([]);
   const [checkers, setCheckers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -105,16 +105,22 @@ export default function RequestsScreen({ user }) {
               <div style={{ fontSize: 13, color: "#94a3b8" }}>
                 Created {new Date(r.created_at).toLocaleDateString()}
               </div>
-              {r.status === "open" && user?.id === r.assigned_to && (
+              {r.status === "open" && (user?.id === r.assigned_to || isAdmin) && (
                 <button onClick={() => handleStatus(r.id, "in_progress")}
                   style={{ ...input, marginTop: 6, cursor: "pointer" }}>
                   Start
                 </button>
               )}
-              {r.status === "in_progress" && user?.id === r.assigned_to && (
+              {r.status === "in_progress" && (user?.id === r.assigned_to || isAdmin) && (
                 <button onClick={() => handleStatus(r.id, "completed")}
                   style={{ ...input, marginTop: 6, cursor: "pointer" }}>
                   Mark complete
+                </button>
+              )}
+              {r.status === "in_progress" && (user?.id === r.assigned_to || isAdmin) && (
+                <button onClick={() => onOpenCount?.(r)}
+                  style={{ ...input, marginTop: 6, marginLeft: 6, background: "#2563eb", border: "none", cursor: "pointer" }}>
+                  Count items
                 </button>
               )}
             </li>
