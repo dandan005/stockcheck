@@ -5,7 +5,7 @@ export default function ItemsScreen() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ sku: "", name: "", location: "", expectedQty: 0 });
+  const [form, setForm] = useState({ sku: "", name: "", barcode: "", location: "", expectedQty: 0 });
   const [saving, setSaving] = useState(false);
 
   async function load() {
@@ -29,8 +29,8 @@ export default function ItemsScreen() {
     setSaving(true);
     setError("");
     try {
-      await createItem({ ...form, expectedQty: Number(form.expectedQty) || 0 });
-      setForm({ sku: "", name: "", location: "", expectedQty: 0 });
+      await createItem({ ...form, barcode: form.barcode.trim() || null, expectedQty: Number(form.expectedQty) || 0 });
+      setForm({ sku: "", name: "", barcode: "", location: "", expectedQty: 0 });
       await load();
     } catch (err) {
       setError(err.message);
@@ -55,6 +55,8 @@ export default function ItemsScreen() {
       <form onSubmit={handleAdd} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
         <input style={input} placeholder="SKU" value={form.sku}
           onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
+        <input style={input} placeholder="Barcode (optional)" value={form.barcode}
+          onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
         <input style={input} placeholder="Name" value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })} required />
         <input style={input} placeholder="Location" value={form.location}
@@ -76,7 +78,7 @@ export default function ItemsScreen() {
         <ul style={{ listStyle: "none", padding: 0 }}>
           {items.map((it) => (
             <li key={it.id} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b" }}>
-              <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}
+              <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}{it.barcode ? " — barcode " + it.barcode : ""}
             </li>
           ))}
         </ul>
