@@ -165,3 +165,10 @@ async function cached(key, fetcher) {
 export const getMe = () => cached("me", fetchMe);
 export const getUsers = () => cached("users", fetchUsers);
 export const getRequests = () => cached("requests", fetchRequests);
+
+export async function updateItem(id, patch) {
+  return (await apiFetch(`/api/items/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(patch),
+  })).json();
+}

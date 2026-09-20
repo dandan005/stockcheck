@@ -58,7 +58,7 @@ export default function App() {
             {tab === "requests" ? (
               <RequestsScreen user={user} onOpenCount={setCountRequest} />
             ) : (
-              <ItemsScreen />
+              <ItemsScreen user={user} />
             )}
           </>
         )}

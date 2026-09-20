@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { getItems, createItem } from "../lib/api.js";
+import { getItems, createItem, updateItem } from "../lib/api.js";
+import BarcodeScanner from "./BarcodeScanner.jsx";
 
-export default function ItemsScreen() {
+export default function ItemsScreen({ user }) {
+  const isAdmin = user?.role === "admin";
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ sku: "", name: "", barcode: "", location: "", expectedQty: 0 });
   const [saving, setSaving] = useState(false);
+  const [assigningId, setAssigningId] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -39,6 +42,30 @@ export default function ItemsScreen() {
     }
   }
 
+  async function handleAssign(code) {
+    const target = items.find((x) => x.id === assigningId);
+    setAssigningId(null);
+    if (!target) return;
+    const clash = items.find((x) => x.id !== target.id && x.barcode === code);
+    if (clash) {
+      setError(`Barcode ${code} is already assigned to ${clash.sku}`);
+      return;
+    }
+    if (
+      target.barcode &&
+      !window.confirm(`Replace barcode ${target.barcode} on ${target.sku} with ${code}?`)
+    ) {
+      return;
+    }
+    setError("");
+    try {
+      await updateItem(target.id, { barcode: code });
+      await load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   const input = {
     padding: "10px",
     borderRadius: "8px",
@@ -47,6 +74,8 @@ export default function ItemsScreen() {
     color: "#f8fafc",
     fontSize: "15px",
   };
+
+  const assigningItem = items.find((x) => x.id === assigningId);
 
   return (
     <div>
@@ -69,6 +98,13 @@ export default function ItemsScreen() {
         </button>
       </form>
 
+      {assigningItem && (
+        <div style={{ marginBottom: 16 }}>
+          <p>Scan the barcode for <strong>{assigningItem.sku}</strong></p>
+          <BarcodeScanner onScan={handleAssign} onClose={() => setAssigningId(null)} />
+        </div>
+      )}
+
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
       {loading ? (
         <p>Loading…</p>
@@ -78,7 +114,18 @@ export default function ItemsScreen() {
         <ul style={{ listStyle: "none", padding: 0 }}>
           {items.map((it) => (
             <li key={it.id} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b" }}>
-              <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}{it.barcode ? " — barcode " + it.barcode : ""}
+              <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}
+              {it.barcode ? " — barcode " + it.barcode : ""}
+              {isAdmin && (
+                <div style={{ marginTop: 6 }}>
+                  <button
+                    onClick={() => { setError(""); setAssigningId(it.id); }}
+                    style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer" }}
+                  >
+                    {it.barcode ? "Change barcode" : "Scan barcode"}
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>
