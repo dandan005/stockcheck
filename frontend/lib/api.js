@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { saveItems, loadCachedItems, saveChecks, loadCachedChecks } from "./itemsCache";
 import { enqueueCheck, flushQueue } from "./offlineQueue";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -53,7 +54,7 @@ export async function updateRequest(id, patch) {
   })).json();
 }
 
-export async function getChecksForRequest(requestId) {
+async function fetchChecks(requestId) {
   return (await apiFetch(`/api/requests/${requestId}/checks`)).json();
 }
 
@@ -64,7 +65,7 @@ async function sendCheck(check) {
   })).json();
 }
 
-export async function getItems() {
+async function fetchItems() {
   return (await apiFetch("/api/items")).json();
 }
 
@@ -116,4 +117,30 @@ export async function submitCheck(check) {
 
 export function syncPending() {
   return flushQueue(sendCheck);
+}
+export async function getItems() {
+  try {
+    const items = await fetchItems();
+    saveItems(items).catch(() => {});
+    return items;
+  } catch (err) {
+    if (err instanceof TypeError || !navigator.onLine) {
+      const cached = await loadCachedItems();
+      if (cached.length) return cached;
+    }
+    throw err;
+  }
+}
+
+export async function getChecksForRequest(requestId) {
+  try {
+    const rows = await fetchChecks(requestId);
+    saveChecks(requestId, rows).catch(() => {});
+    return rows;
+  } catch (err) {
+    if (err instanceof TypeError || !navigator.onLine) {
+      return (await loadCachedChecks(requestId)) ?? [];
+    }
+    throw err;
+  }
 }
