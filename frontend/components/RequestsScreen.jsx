@@ -60,6 +60,16 @@ export default function RequestsScreen({ user, onOpenCount }) {
     }
   }
 
+  async function handleReassign(id, newAssignee) {
+    setError("");
+    try {
+      await updateRequest(id, { assignedTo: newAssignee || null });
+      await load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   const input = {
     padding: "10px",
     borderRadius: "8px",
@@ -105,6 +115,24 @@ export default function RequestsScreen({ user, onOpenCount }) {
               <div style={{ fontSize: 13, color: "#94a3b8" }}>
                 Created {new Date(r.created_at).toLocaleDateString()}
               </div>
+              {isAdmin ? (
+                <select
+                  style={{ ...input, marginTop: 6, fontSize: 13, padding: "6px 8px" }}
+                  value={r.assigned_to || ""}
+                  onChange={(e) => handleReassign(r.id, e.target.value)}
+                >
+                  <option value="">Unassigned</option>
+                  {checkers.map((c) => (
+                    <option key={c.id} value={c.id}>{c.full_name || c.id}</option>
+                  ))}
+                </select>
+              ) : (
+                r.assigned_to && (
+                  <div style={{ fontSize: 13, color: "#94a3b8" }}>
+                    Assigned to: {checkers.find((c) => c.id === r.assigned_to)?.full_name || r.assigned_to}
+                  </div>
+                )
+              )}
               {r.status === "open" && (user?.id === r.assigned_to || isAdmin) && (
                 <button onClick={() => handleStatus(r.id, "in_progress")}
                   style={{ ...input, marginTop: 6, cursor: "pointer" }}>
