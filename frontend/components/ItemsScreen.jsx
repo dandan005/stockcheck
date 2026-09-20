@@ -122,6 +122,8 @@ export default function ItemsScreen({ user }) {
     }
   }
 
+  const [addOpen, setAddOpen] = useState(false);
+
   const input = {
     padding: "10px",
     borderRadius: "8px",
@@ -129,6 +131,24 @@ export default function ItemsScreen({ user }) {
     background: "#1e293b",
     color: "#f8fafc",
     fontSize: "15px",
+  };
+  const smallBtn = { ...input, padding: "7px 12px", fontSize: 13, cursor: "pointer" };
+  const chip = {
+    fontSize: 12,
+    fontWeight: 700,
+    letterSpacing: 1,
+    padding: "3px 10px",
+    borderRadius: 999,
+    background: "#1e1b4b",
+    color: "#a5b4fc",
+    border: "1px solid #3730a3",
+  };
+  const tag = {
+    fontSize: 12,
+    padding: "3px 9px",
+    borderRadius: 999,
+    background: "#1e293b",
+    color: "#cbd5e1",
   };
 
   const assigningItem = items.find((x) => x.id === assigningId);
@@ -143,61 +163,102 @@ export default function ItemsScreen({ user }) {
       )
     : items;
 
+  async function submitAdd(e) {
+    await handleAdd(e);
+    setAddOpen(false);
+  }
+
+  const empty = (text) => (
+    <div style={{ textAlign: "center", padding: "40px 16px", color: "#94a3b8" }}>
+      <div style={{ fontSize: 40, marginBottom: 8 }}>📦</div>
+      {text}
+    </div>
+  );
+
   return (
     <div>
-
-      {isAdmin && !editingId && !q && !searchFocused && (
-      <form onSubmit={handleAdd} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
-        <input style={input} placeholder="SKU" value={form.sku}
-          onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
-        <input style={input} placeholder="Barcode (optional)" value={form.barcode}
-          onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
-        <input style={input} placeholder="Name" value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-        <input style={input} placeholder="Location" value={form.location}
-          onChange={(e) => setForm({ ...form, location: e.target.value })} />
-        <input style={input} type="number" placeholder="Expected qty" value={form.expectedQty}
-          onChange={(e) => setForm({ ...form, expectedQty: e.target.value })} />
-        <button type="submit" disabled={saving}
-          style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer" }}>
-          {saving ? "Adding…" : "Add item"}
-        </button>
-      </form>
+      {isAdmin && !editingId && (
+        <div style={{ marginBottom: 12 }}>
+          <button
+            onClick={() => setAddOpen((o) => !o)}
+            style={{
+              ...input,
+              width: "100%",
+              fontWeight: 600,
+              cursor: "pointer",
+              background: addOpen ? "#1e293b" : "#2563eb",
+              border: addOpen ? "1px solid #334155" : "none",
+            }}
+          >
+            {addOpen ? "Close" : "+ Add item"}
+          </button>
+          {addOpen && (
+            <form
+              onSubmit={submitAdd}
+              className="sc-card"
+              style={{ display: "grid", gap: 8, padding: 14, marginTop: 10 }}
+            >
+              <input style={input} placeholder="SKU" value={form.sku}
+                onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
+              <input style={input} placeholder="Barcode (optional)" value={form.barcode}
+                onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
+              <input style={input} placeholder="Name" value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+              <input style={input} placeholder="Location" value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })} />
+              <input style={input} type="number" placeholder="Expected qty" value={form.expectedQty}
+                onChange={(e) => setForm({ ...form, expectedQty: e.target.value })} />
+              <button type="submit" disabled={saving}
+                style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer" }}>
+                {saving ? "Adding…" : "Save item"}
+              </button>
+            </form>
+          )}
+        </div>
       )}
 
       {assigningItem && (
-        <div style={{ marginBottom: 16 }}>
-          <p>Scan the barcode for <strong>{assigningItem.sku}</strong></p>
+        <div className="sc-card" style={{ padding: 14, marginBottom: 12 }}>
+          <p style={{ marginTop: 0 }}>Scan the barcode for <strong>{assigningItem.sku}</strong></p>
           <BarcodeScanner onScan={handleAssign} onClose={() => setAssigningId(null)} />
         </div>
       )}
 
-      <input
-        style={{ ...input, width: "100%", maxWidth: 360, marginBottom: 12, boxSizing: "border-box" }}
-        placeholder="Search by SKU, name, or barcode…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        onFocus={() => setSearchFocused(true)}
-        onBlur={() => setSearchFocused(false)}
-      />
+      <div
+        style={{
+          position: "sticky",
+          top: "64px",
+          zIndex: 5,
+          margin: "0 -16px 8px",
+          padding: "8px 16px",
+          backgroundColor: "#0f172a",
+        }}
+      >
+        <input
+          style={{ ...input, width: "100%", boxSizing: "border-box" }}
+          placeholder="🔍  Search by SKU, name, or barcode…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
       {loading ? (
         <LoadingCards />
       ) : items.length === 0 ? (
-        <p>No items yet.</p>
+        empty("No items yet.")
       ) : filteredItems.length === 0 ? (
-        <p>No items match "{search}".</p>
+        empty("No items match your search.")
       ) : (
         <>
-          <p style={{ color: "#94a3b8", margin: "0 0 8px" }}>
-            {q ? `${filteredItems.length} of ${items.length} items` : `${items.length} items`}
-          </p>
-          <ul style={{ listStyle: "none", padding: 0 }}>
+          <div className="sc-label">
+            {q ? filteredItems.length + " of " + items.length + " items" : items.length + " items"}
+          </div>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {filteredItems.slice(0, 200).map((it) => (
-              <li key={it.id} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b" }}>
+              <li key={it.id} className="sc-card" style={{ padding: 12, marginBottom: 10 }}>
                 {editingId === it.id ? (
-                  <div style={{ display: "grid", gap: 6, maxWidth: 360 }}>
+                  <div style={{ display: "grid", gap: 6 }}>
                     <input style={input} placeholder="SKU" value={editForm.sku}
                       onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })} />
                     <input style={input} placeholder="Name" value={editForm.name}
@@ -212,40 +273,41 @@ export default function ItemsScreen({ user }) {
                       <button
                         onClick={() => handleSaveEdit(it.id)}
                         disabled={savingEdit}
-                        style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer", padding: "6px 12px", fontSize: 13 }}
+                        style={{ ...smallBtn, background: "#2563eb", border: "none" }}
                       >
                         {savingEdit ? "Saving…" : "Save"}
                       </button>
-                      <button
-                        onClick={cancelEdit}
-                        style={{ ...input, padding: "6px 12px", fontSize: 13, cursor: "pointer" }}
-                      >
+                      <button onClick={cancelEdit} style={smallBtn}>
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}
-                    {it.barcode ? " — barcode " + it.barcode : ""}
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                      <span style={chip}>{it.sku}</span>
+                      {it.barcode && <span style={tag}>barcode {it.barcode}</span>}
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 15, margin: "8px 0 6px" }}>{it.name}</div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      <span style={tag}>📍 {it.location || "no location"}</span>
+                      <span style={tag}>Expected {it.expected_qty}</span>
+                    </div>
                     {isAdmin && (
-                      <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
                         <button
                           onClick={() => { setError(""); setAssigningId(it.id); }}
-                          style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer" }}
+                          style={smallBtn}
                         >
                           {it.barcode ? "Change barcode" : "Scan barcode"}
                         </button>
-                        <button
-                          onClick={() => startEdit(it)}
-                          style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer" }}
-                        >
+                        <button onClick={() => startEdit(it)} style={smallBtn}>
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(it)}
                           disabled={deletingId === it.id}
-                          style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer", color: "#f87171", borderColor: "#7f1d1d" }}
+                          style={{ ...smallBtn, color: "#f87171", borderColor: "#7f1d1d" }}
                         >
                           {deletingId === it.id ? "Deleting…" : "Delete"}
                         </button>

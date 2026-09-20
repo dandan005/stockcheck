@@ -116,7 +116,7 @@ export default function AppHeader({ user }) {
             </span>
             <span
               style={{
-                maxWidth: 100,
+                maxWidth: 150,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",

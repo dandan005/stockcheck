@@ -112,7 +112,7 @@ export default function App() {
           color: active ? "#c7d2fe" : "#64748b",
           fontFamily: "var(--display)",
           fontSize: 10,
-          letterSpacing: 2.5,
+          letterSpacing: 1.2,
           textTransform: "uppercase",
           fontWeight: active ? 700 : 400,
           cursor: "pointer",
@@ -160,7 +160,15 @@ export default function App() {
           />
         ) : (
           <>
-            <PageIntro {...intro[tab]} />
+            <PageIntro
+              {...(tab === "items" && user && user.role !== "admin"
+                ? {
+                    ...intro.items,
+                    title: "Browse the item catalog.",
+                    sub: "Search items by SKU, name or barcode.",
+                  }
+                : intro[tab])}
+            />
             {tab === "requests" ? (
               <RequestsScreen user={user} onOpenCount={setCountRequest} />
             ) : tab === "completed" ? (
