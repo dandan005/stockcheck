@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getItems, createItem, updateItem } from "../lib/api.js";
+import { getItems, createItem, updateItem, deleteItem } from "../lib/api.js";
 import BarcodeScanner from "./BarcodeScanner.jsx";
 
 export default function ItemsScreen({ user }) {
@@ -11,6 +11,10 @@ export default function ItemsScreen({ user }) {
   const [saving, setSaving] = useState(false);
   const [assigningId, setAssigningId] = useState(null);
   const [search, setSearch] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -67,6 +71,55 @@ export default function ItemsScreen({ user }) {
     }
   }
 
+  function startEdit(it) {
+    setError("");
+    setEditingId(it.id);
+    setEditForm({
+      sku: it.sku,
+      name: it.name,
+      barcode: it.barcode || "",
+      location: it.location || "",
+      expectedQty: it.expected_qty ?? 0,
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditForm(null);
+  }
+
+  async function handleSaveEdit(id) {
+    setSavingEdit(true);
+    setError("");
+    try {
+      await updateItem(id, {
+        ...editForm,
+        barcode: editForm.barcode.trim() || null,
+        expectedQty: Number(editForm.expectedQty) || 0,
+      });
+      cancelEdit();
+      await load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function handleDelete(it) {
+    if (!window.confirm(`Delete "${it.sku} — ${it.name}"? This cannot be undone.`)) return;
+    setDeletingId(it.id);
+    setError("");
+    try {
+      await deleteItem(it.id);
+      await load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   const input = {
     padding: "10px",
     borderRadius: "8px",
@@ -92,7 +145,7 @@ export default function ItemsScreen({ user }) {
     <div>
       <h2>Items</h2>
 
-      {isAdmin && (
+      {isAdmin && !editingId && (
       <form onSubmit={handleAdd} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
         <input style={input} placeholder="SKU" value={form.sku}
           onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
@@ -140,17 +193,62 @@ export default function ItemsScreen({ user }) {
           <ul style={{ listStyle: "none", padding: 0 }}>
             {filteredItems.slice(0, 200).map((it) => (
               <li key={it.id} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b" }}>
-                <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}
-                {it.barcode ? " — barcode " + it.barcode : ""}
-                {isAdmin && (
-                  <div style={{ marginTop: 6 }}>
-                    <button
-                      onClick={() => { setError(""); setAssigningId(it.id); }}
-                      style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer" }}
-                    >
-                      {it.barcode ? "Change barcode" : "Scan barcode"}
-                    </button>
+                {editingId === it.id ? (
+                  <div style={{ display: "grid", gap: 6, maxWidth: 360 }}>
+                    <input style={input} placeholder="SKU" value={editForm.sku}
+                      onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })} />
+                    <input style={input} placeholder="Name" value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                    <input style={input} placeholder="Barcode (optional)" value={editForm.barcode}
+                      onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })} />
+                    <input style={input} placeholder="Location" value={editForm.location}
+                      onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} />
+                    <input style={input} type="number" placeholder="Expected qty" value={editForm.expectedQty}
+                      onChange={(e) => setEditForm({ ...editForm, expectedQty: e.target.value })} />
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        onClick={() => handleSaveEdit(it.id)}
+                        disabled={savingEdit}
+                        style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer", padding: "6px 12px", fontSize: 13 }}
+                      >
+                        {savingEdit ? "Saving…" : "Save"}
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        style={{ ...input, padding: "6px 12px", fontSize: 13, cursor: "pointer" }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
+                ) : (
+                  <>
+                    <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}
+                    {it.barcode ? " — barcode " + it.barcode : ""}
+                    {isAdmin && (
+                      <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <button
+                          onClick={() => { setError(""); setAssigningId(it.id); }}
+                          style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer" }}
+                        >
+                          {it.barcode ? "Change barcode" : "Scan barcode"}
+                        </button>
+                        <button
+                          onClick={() => startEdit(it)}
+                          style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer" }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(it)}
+                          disabled={deletingId === it.id}
+                          style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer", color: "#f87171", borderColor: "#7f1d1d" }}
+                        >
+                          {deletingId === it.id ? "Deleting…" : "Delete"}
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </li>
             ))}

@@ -172,3 +172,7 @@ export async function updateItem(id, patch) {
     body: JSON.stringify(patch),
   })).json();
 }
+
+export async function deleteItem(id) {
+  await apiFetch(`/api/items/${id}`, { method: "DELETE" });
+}
