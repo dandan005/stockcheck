@@ -1,3 +1,4 @@
+import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUser, deleteUser } from "../lib/api.js";
 
@@ -95,7 +96,6 @@ export default function UsersScreen({ user }) {
 
   return (
     <div>
-      <h2>Users</h2>
 
       {!editingId && (
         <form onSubmit={handleAdd} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
@@ -118,7 +118,7 @@ export default function UsersScreen({ user }) {
 
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
       {loading ? (
-        <p>Loading…</p>
+        <LoadingCards />
       ) : users.length === 0 ? (
         <p>No users yet.</p>
       ) : (

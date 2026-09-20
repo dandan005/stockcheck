@@ -1,3 +1,4 @@
+import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState } from "react";
 import { getItems, createItem, updateItem, deleteItem } from "../lib/api.js";
 import BarcodeScanner from "./BarcodeScanner.jsx";
@@ -144,7 +145,6 @@ export default function ItemsScreen({ user }) {
 
   return (
     <div>
-      <h2>Items</h2>
 
       {isAdmin && !editingId && !q && !searchFocused && (
       <form onSubmit={handleAdd} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
@@ -183,7 +183,7 @@ export default function ItemsScreen({ user }) {
 
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
       {loading ? (
-        <p>Loading…</p>
+        <LoadingCards />
       ) : items.length === 0 ? (
         <p>No items yet.</p>
       ) : filteredItems.length === 0 ? (

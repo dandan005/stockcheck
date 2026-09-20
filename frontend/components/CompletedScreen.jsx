@@ -1,3 +1,4 @@
+import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState } from "react";
 import {
   getRequests,
@@ -92,10 +93,9 @@ export default function CompletedScreen() {
 
   return (
     <div>
-      <h2 style={{ fontSize: 20 }}>Completed checks</h2>
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
       {loading ? (
-        <p>Loading…</p>
+        <LoadingCards />
       ) : requests.length === 0 ? (
         <p style={{ color: "#94a3b8" }}>No completed checks yet.</p>
       ) : (

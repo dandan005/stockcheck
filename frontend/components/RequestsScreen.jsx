@@ -1,3 +1,4 @@
+import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState } from "react";
 import { getRequests, createRequest, updateRequest, getCheckers, submitStatus } from "../lib/api.js";
 
@@ -86,79 +87,139 @@ export default function RequestsScreen({ user, onOpenCount }) {
     return isAdmin || (user?.role === "requester" && r.requested_by === user?.id);
   }
 
+  const pill = {
+    open: { bg: "#1e3a8a", fg: "#93c5fd" },
+    in_progress: { bg: "#78350f", fg: "#fcd34d" },
+    completed: { bg: "#14532d", fg: "#86efac" },
+  };
+  const card = {
+    background: "#111827",
+    border: "1px solid #1e293b",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  };
+  const smallBtn = { ...input, padding: "8px 12px", fontSize: 14, cursor: "pointer" };
+  const primaryBtn = { ...smallBtn, background: "#2563eb", border: "none" };
+  const nameOf = (id) => checkers.find((c) => c.id === id)?.full_name || id;
+
   return (
     <div>
-      <h2>Stock Check Requests</h2>
 
       {canCreate && (
-        <form onSubmit={handleCreate} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
+        <form onSubmit={handleCreate} style={{ ...card, display: "grid", gap: 8, marginBottom: 20 }}>
+          <div style={{ fontWeight: 600 }}>New request</div>
           <select style={input} value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
             <option value="">Unassigned</option>
             {checkers.map((c) => (
               <option key={c.id} value={c.id}>{c.full_name || c.id}</option>
             ))}
           </select>
-          <input style={input} placeholder="Notes (optional)" value={notes}
-            onChange={(e) => setNotes(e.target.value)} />
-          <button type="submit" disabled={saving}
-            style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer" }}>
-            {saving ? "Creating…" : "New request"}
+          <input
+            style={input}
+            placeholder="Notes (optional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+          <button type="submit" disabled={saving} style={primaryBtn}>
+            {saving ? "Creating…" : "Create request"}
           </button>
         </form>
       )}
 
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
       {loading ? (
-        <p>Loading…</p>
+        <LoadingCards />
       ) : visible.length === 0 ? (
-        <p>No requests yet.</p>
+        <div
+          style={{
+            minHeight: "calc(100vh - 500px)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            padding: "0 16px",
+            color: "#94a3b8",
+          }}
+        >
+          <div style={{ fontSize: 48, marginBottom: 8 }}>
+            {user?.role === "checker" ? "🎉" : "📋"}
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 600, color: "#f8fafc" }}>
+            {user?.role === "checker" ? "All caught up" : "No open requests"}
+          </div>
+          <div style={{ fontSize: 14, marginTop: 6 }}>
+            {user?.role === "checker"
+              ? "New stock checks assigned to you will show up here."
+              : "Create a request above to get started."}
+          </div>
+          <button onClick={load} style={{ ...smallBtn, marginTop: 16 }}>
+            ↻ Refresh
+          </button>
+        </div>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {visible.map((r) => (
-            <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid #1e293b" }}>
-              <div><strong>{r.status}</strong> {r.notes ? `— ${r.notes}` : ""}</div>
-              <div style={{ fontSize: 13, color: "#94a3b8" }}>
+        visible.map((r) => {
+          const c = pill[r.status] || pill.open;
+          const mine = user?.id === r.assigned_to;
+          return (
+            <div key={r.id} style={card}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+                <strong style={{ fontSize: 16 }}>{r.notes || "Stock check"}</strong>
+                <span
+                  style={{
+                    fontSize: 12,
+                    padding: "2px 8px",
+                    borderRadius: 999,
+                    background: c.bg,
+                    color: c.fg,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {r.status.replace("_", " ")}
+                </span>
+              </div>
+              <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>
                 Created {new Date(r.created_at).toLocaleDateString()}
               </div>
               {canReassign(r) ? (
                 <select
-                  style={{ ...input, marginTop: 6, fontSize: 13, padding: "6px 8px" }}
+                  style={{ ...input, marginTop: 8, fontSize: 13, padding: "6px 8px" }}
                   value={r.assigned_to || ""}
                   onChange={(e) => handleReassign(r.id, e.target.value)}
                 >
                   <option value="">Unassigned</option>
-                  {checkers.map((c) => (
-                    <option key={c.id} value={c.id}>{c.full_name || c.id}</option>
+                  {checkers.map((ck) => (
+                    <option key={ck.id} value={ck.id}>{ck.full_name || ck.id}</option>
                   ))}
                 </select>
               ) : (
-                r.assigned_to && (
-                  <div style={{ fontSize: 13, color: "#94a3b8" }}>
-                    Assigned to: {checkers.find((c) => c.id === r.assigned_to)?.full_name || r.assigned_to}
-                  </div>
-                )
+                <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>
+                  {r.assigned_to ? "Assigned to: " + nameOf(r.assigned_to) : "Unassigned"}
+                </div>
               )}
-              {r.status === "open" && user?.id === r.assigned_to && (
-                <button onClick={() => handleStatus(r.id, "in_progress")}
-                  style={{ ...input, marginTop: 6, cursor: "pointer" }}>
-                  Start
-                </button>
+              {mine && (r.status === "open" || r.status === "in_progress") && (
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  {r.status === "open" && (
+                    <button onClick={() => handleStatus(r.id, "in_progress")} style={primaryBtn}>
+                      Start
+                    </button>
+                  )}
+                  {r.status === "in_progress" && (
+                    <>
+                      <button onClick={() => handleStatus(r.id, "completed")} style={smallBtn}>
+                        Mark complete
+                      </button>
+                      <button onClick={() => onOpenCount?.(r)} style={primaryBtn}>
+                        Count items
+                      </button>
+                    </>
+                  )}
+                </div>
               )}
-              {r.status === "in_progress" && user?.id === r.assigned_to && (
-                <button onClick={() => handleStatus(r.id, "completed")}
-                  style={{ ...input, marginTop: 6, cursor: "pointer" }}>
-                  Mark complete
-                </button>
-              )}
-              {r.status === "in_progress" && user?.id === r.assigned_to && (
-                <button onClick={() => onOpenCount?.(r)}
-                  style={{ ...input, marginTop: 6, marginLeft: 6, background: "#2563eb", border: "none", cursor: "pointer" }}>
-                  Count items
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
+            </div>
+          );
+        })
       )}
     </div>
   );
