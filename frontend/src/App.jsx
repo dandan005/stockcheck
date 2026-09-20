@@ -3,6 +3,7 @@ import SyncStatus from "../components/SyncStatus.jsx";
 import AuthGate from "../components/AuthGate.jsx";
 import ItemsScreen from "../components/ItemsScreen.jsx";
 import UsersScreen from "../components/UsersScreen.jsx";
+import CompletedScreen from "../components/CompletedScreen.jsx";
 import RequestsScreen from "../components/RequestsScreen.jsx";
 import CountScreen from "../components/CountScreen.jsx";
 import { getMe } from "../lib/api.js";
@@ -84,6 +85,8 @@ export default function App() {
           />
         ) : tab === "requests" ? (
           <RequestsScreen user={user} onOpenCount={setCountRequest} />
+        ) : tab === "completed" ? (
+          <CompletedScreen />
         ) : tab === "items" ? (
           <ItemsScreen user={user} />
         ) : (
@@ -106,6 +109,7 @@ export default function App() {
           }}
         >
           {navBtn("requests", "📋", "Requests")}
+          {navBtn("completed", "✅", "Completed")}
           {navBtn("items", "📦", "Items")}
           {user?.role === "admin" && navBtn("users", "👥", "Users")}
         </nav>

@@ -80,6 +80,8 @@ export default function RequestsScreen({ user, onOpenCount }) {
   };
 
   // Requesters can reassign only their own requests; admins can reassign any.
+  const visible = requests.filter((r) => r.status !== "completed");
+
   function canReassign(r) {
     return isAdmin || (user?.role === "requester" && r.requested_by === user?.id);
   }
@@ -108,11 +110,11 @@ export default function RequestsScreen({ user, onOpenCount }) {
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
       {loading ? (
         <p>Loading…</p>
-      ) : requests.length === 0 ? (
+      ) : visible.length === 0 ? (
         <p>No requests yet.</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
-          {requests.map((r) => (
+          {visible.map((r) => (
             <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid #1e293b" }}>
               <div><strong>{r.status}</strong> {r.notes ? `— ${r.notes}` : ""}</div>
               <div style={{ fontSize: 13, color: "#94a3b8" }}>
