@@ -10,6 +10,7 @@ export default function ItemsScreen({ user }) {
   const [form, setForm] = useState({ sku: "", name: "", barcode: "", location: "", expectedQty: 0 });
   const [saving, setSaving] = useState(false);
   const [assigningId, setAssigningId] = useState(null);
+  const [search, setSearch] = useState("");
 
   async function load() {
     setLoading(true);
@@ -77,6 +78,16 @@ export default function ItemsScreen({ user }) {
 
   const assigningItem = items.find((x) => x.id === assigningId);
 
+  const q = search.trim().toLowerCase();
+  const filteredItems = q
+    ? items.filter(
+        (it) =>
+          it.sku?.toLowerCase().includes(q) ||
+          it.name?.toLowerCase().includes(q) ||
+          it.barcode?.toLowerCase().includes(q)
+      )
+    : items;
+
   return (
     <div>
       <h2>Items</h2>
@@ -105,30 +116,47 @@ export default function ItemsScreen({ user }) {
         </div>
       )}
 
+      <input
+        style={{ ...input, width: "100%", maxWidth: 360, marginBottom: 12, boxSizing: "border-box" }}
+        placeholder="Search by SKU, name, or barcode…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
       {loading ? (
         <p>Loading…</p>
       ) : items.length === 0 ? (
         <p>No items yet.</p>
+      ) : filteredItems.length === 0 ? (
+        <p>No items match "{search}".</p>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {items.map((it) => (
-            <li key={it.id} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b" }}>
-              <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}
-              {it.barcode ? " — barcode " + it.barcode : ""}
-              {isAdmin && (
-                <div style={{ marginTop: 6 }}>
-                  <button
-                    onClick={() => { setError(""); setAssigningId(it.id); }}
-                    style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer" }}
-                  >
-                    {it.barcode ? "Change barcode" : "Scan barcode"}
-                  </button>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        <>
+          <p style={{ color: "#94a3b8", margin: "0 0 8px" }}>
+            {q ? `${filteredItems.length} of ${items.length} items` : `${items.length} items`}
+          </p>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {filteredItems.slice(0, 200).map((it) => (
+              <li key={it.id} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b" }}>
+                <strong>{it.sku}</strong> — {it.name} ({it.location || "no location"}) — expected {it.expected_qty}
+                {it.barcode ? " — barcode " + it.barcode : ""}
+                {isAdmin && (
+                  <div style={{ marginTop: 6 }}>
+                    <button
+                      onClick={() => { setError(""); setAssigningId(it.id); }}
+                      style={{ ...input, padding: "6px 10px", fontSize: 13, cursor: "pointer" }}
+                    >
+                      {it.barcode ? "Change barcode" : "Scan barcode"}
+                    </button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+          {filteredItems.length > 200 && (
+            <p style={{ color: "#94a3b8" }}>Showing first 200 — keep typing to narrow it down.</p>
+          )}
+        </>
       )}
     </div>
   );

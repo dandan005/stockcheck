@@ -7,6 +7,7 @@ export default function CountScreen({ request, onBack }) {
   const [items, setItems] = useState([]);
   const [checks, setChecks] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState("");
+  const [itemSearch, setItemSearch] = useState("");
   const [countedQty, setCountedQty] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [error, setError] = useState("");
@@ -34,11 +35,21 @@ export default function CountScreen({ request, onBack }) {
     setScannerOpen(false);
     const match = items.find((it) => it.sku === code || it.barcode === code);
     if (match) {
-      setSelectedItemId(match.id);
+      selectItem(match);
       setError("");
     } else {
       setError(`No item found for scanned code "${code}"`);
     }
+  }
+
+  function selectItem(it) {
+    setSelectedItemId(it.id);
+    setItemSearch(`${it.sku} — ${it.name}`);
+  }
+
+  function clearSelection() {
+    setSelectedItemId("");
+    setItemSearch("");
   }
 
   async function handleSubmit(e) {
@@ -53,7 +64,7 @@ export default function CountScreen({ request, onBack }) {
         countedQty: Number(countedQty),
         method: "manual",
       });
-      setSelectedItemId("");
+      clearSelection();
       setCountedQty("");
       await load();
     } catch (err) {
@@ -74,6 +85,14 @@ export default function CountScreen({ request, onBack }) {
 
   const selectedItem = items.find((it) => it.id === selectedItemId);
 
+  const q = itemSearch.trim().toLowerCase();
+  const showResults = q && !selectedItem;
+  const matches = showResults
+    ? items
+        .filter((it) => it.sku?.toLowerCase().includes(q) || it.name?.toLowerCase().includes(q))
+        .slice(0, 30)
+    : [];
+
   return (
     <div>
       <button onClick={onBack} style={{ ...input, marginBottom: 16, cursor: "pointer" }}>
@@ -91,12 +110,52 @@ export default function CountScreen({ request, onBack }) {
       )}
 
       <form onSubmit={handleSubmit} style={{ display: "grid", gap: 8, maxWidth: 360, marginBottom: 20 }}>
-        <select style={input} value={selectedItemId} onChange={(e) => setSelectedItemId(e.target.value)}>
-          <option value="">Select item…</option>
-          {items.map((it) => (
-            <option key={it.id} value={it.id}>{it.sku} — {it.name}</option>
-          ))}
-        </select>
+        <div style={{ position: "relative" }}>
+          <input
+            style={{ ...input, width: "100%", boxSizing: "border-box" }}
+            placeholder="Type SKU or item name…"
+            value={itemSearch}
+            onChange={(e) => {
+              setItemSearch(e.target.value);
+              if (selectedItemId) setSelectedItemId("");
+            }}
+          />
+          {selectedItemId && (
+            <button
+              type="button"
+              onClick={clearSelection}
+              style={{
+                position: "absolute", right: 6, top: 6, bottom: 6,
+                background: "transparent", border: "none", color: "#94a3b8",
+                cursor: "pointer", fontSize: 16, padding: "0 8px",
+              }}
+            >
+              ✕
+            </button>
+          )}
+          {showResults && (
+            <ul style={{
+              listStyle: "none", margin: 0, padding: 0, position: "absolute",
+              top: "100%", left: 0, right: 0, background: "#0f172a",
+              border: "1px solid #334155", borderRadius: 8, maxHeight: 240,
+              overflowY: "auto", zIndex: 10,
+            }}>
+              {matches.length === 0 ? (
+                <li style={{ padding: "10px", color: "#94a3b8" }}>No matches</li>
+              ) : (
+                matches.map((it) => (
+                  <li
+                    key={it.id}
+                    onClick={() => selectItem(it)}
+                    style={{ padding: "10px", borderBottom: "1px solid #1e293b", cursor: "pointer" }}
+                  >
+                    <strong>{it.sku}</strong> — {it.name}
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
+        </div>
         {selectedItem && (
           <p style={{ color: "#94a3b8", margin: 0 }}>Expected: {selectedItem.expected_qty}</p>
         )}

@@ -127,9 +127,21 @@ app.post("/api/reports", requireAuth, async (req, res) => {
 /* ------------------------------------------------------------------ */
 
 app.get("/api/items", requireAuth, async (req, res) => {
-  const { data, error } = await req.supabase.from("items").select("*").order("sku");
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  const pageSize = 1000;
+  let allItems = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await req.supabase
+      .from("items")
+      .select("*")
+      .order("sku")
+      .range(from, from + pageSize - 1);
+    if (error) return res.status(500).json({ error: error.message });
+    allItems = allItems.concat(data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  res.json(allItems);
 });
 
 app.post("/api/items", requireAuth, requireRole("admin"), async (req, res) => {
