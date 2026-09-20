@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase.js";
 import { syncPending, syncPendingStatus, getItems } from "../lib/api.js";
 import { usePendingCount, usePendingStatusCount } from "../lib/offlineQueue.js";
 import SignOutButton from "./SignOutButton.jsx";
+import pkg from "../package.json";
 
 // Captured at import time so the browser's install prompt isn't missed.
 let deferredPrompt = null;
@@ -231,6 +232,34 @@ export default function SettingsScreen({ user, onReplayTour }) {
             To install, open your browser menu and choose “Add to Home screen”.
           </div>
         )}
+      </Card>
+
+      <Card title="About">
+        <Row label="App" value="Stock Check" />
+        <Row label="Version" value={pkg.version} />
+        <div style={{ marginTop: 12, marginBottom: 6, fontSize: 13, color: "#94a3b8" }}>
+          Request stock checks, count items by hand or barcode scan, and get
+          a variance report — built for this workplace's inventory workflow.
+        </div>
+        <div style={{ marginTop: 12, fontWeight: 600, fontSize: 13 }}>Built with</div>
+        <Row label="Frontend" value="React 18, Vite, Dexie, html5-qrcode" />
+        <Row label="Backend" value="Node.js, Express, ExcelJS" />
+        <Row label="Database & auth" value="Supabase (Postgres + RLS)" />
+        <Row label="Installable as" value="Progressive Web App (PWA)" />
+        <div
+          style={{
+            marginTop: 14,
+            padding: "10px 12px",
+            borderRadius: 8,
+            background: "linear-gradient(135deg, rgba(37,99,235,0.18), rgba(129,140,248,0.14))",
+            border: "1px solid #3b4670",
+            fontSize: 13,
+            color: "#c7d2fe",
+            textAlign: "center",
+          }}
+        >
+          ✨ Built solo, with <span style={{ color: "#fde9b8", fontWeight: 700 }}>Claude</span> as coding assistant.
+        </div>
       </Card>
     </div>
   );
