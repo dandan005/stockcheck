@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRequests, createRequest, updateRequest, getCheckers } from "../lib/api.js";
+import { getRequests, createRequest, updateRequest, getCheckers, submitStatus } from "../lib/api.js";
 
 export default function RequestsScreen({ user, onOpenCount }) {
   const [requests, setRequests] = useState([]);
@@ -49,11 +49,14 @@ export default function RequestsScreen({ user, onOpenCount }) {
 
   async function handleStatus(id, status) {
     setError("");
+    // Optimistic local update so Start/Complete reflect immediately even offline
+    // (an offline reload would otherwise show stale cached data).
+    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
     try {
-      await updateRequest(id, { status });
-      await load();
+      await submitStatus(id, status);
     } catch (err) {
       setError(err.message);
+      await load(); // roll back to server truth if the update genuinely failed
     }
   }
 

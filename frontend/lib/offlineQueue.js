@@ -2,7 +2,10 @@ import Dexie from "dexie";
 import { useEffect, useState } from "react";
 
 const db = new Dexie("stockcheck-offline");
-db.version(1).stores({ pendingChecks: "&key, queuedAt" });
+db.version(2).stores({
+  pendingChecks: "&key, queuedAt",
+  pendingStatusUpdates: "&requestId, queuedAt",
+});
 
 // One pending row per request+item, so recounting replaces the old value
 // (matches the server-side upsert).
@@ -74,4 +77,49 @@ export function getPendingCount() {
 export async function clearQueue() {
   await db.pendingChecks.clear();
   notify();
+}
+
+// Same pattern as pendingChecks, but for request status changes (Start / Mark complete)
+// made while offline. One pending row per request — a later status overwrites an earlier one.
+export async function enqueueStatusUpdate(update) {
+  await db.pendingStatusUpdates.put({ requestId: update.requestId, update, queuedAt: Date.now() });
+  notify();
+}
+
+let flushingStatus = false;
+
+export async function flushStatusQueue(send) {
+  if (flushingStatus) return { sent: 0, failed: 0 };
+  flushingStatus = true;
+  let sent = 0;
+  let failed = 0;
+  try {
+    const rows = await db.pendingStatusUpdates.orderBy("queuedAt").toArray();
+    for (const row of rows) {
+      try {
+        await send(row.update);
+        await db.pendingStatusUpdates.delete(row.requestId);
+        sent++;
+      } catch (err) {
+        failed++;
+        if (err instanceof TypeError) break; // still unreachable, try later
+        await db.pendingStatusUpdates.update(row.requestId, { lastError: err.message });
+      }
+    }
+  } finally {
+    flushingStatus = false;
+    notify();
+  }
+  return { sent, failed };
+}
+
+export function usePendingStatusCount() {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const refresh = () => db.pendingStatusUpdates.count().then(setN).catch(() => {});
+    refresh();
+    window.addEventListener("pending-changed", refresh);
+    return () => window.removeEventListener("pending-changed", refresh);
+  }, []);
+  return n;
 }

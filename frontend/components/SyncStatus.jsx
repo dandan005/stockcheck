@@ -1,12 +1,17 @@
 import { useEffect } from "react";
-import { syncPending } from "../lib/api.js";
-import { usePendingCount } from "../lib/offlineQueue.js";
+import { syncPending, syncPendingStatus } from "../lib/api.js";
+import { usePendingCount, usePendingStatusCount } from "../lib/offlineQueue.js";
 
 export default function SyncStatus() {
-  const pending = usePendingCount();
+  const pendingChecks = usePendingCount();
+  const pendingStatus = usePendingStatusCount();
+  const pending = pendingChecks + pendingStatus;
 
   useEffect(() => {
-    const run = () => syncPending().catch(() => {});
+    const run = () => {
+      syncPending().catch(() => {});
+      syncPendingStatus().catch(() => {});
+    };
     run();
     window.addEventListener("online", run);
     // "online" doesn't fire if wifi is up but the backend is down
@@ -20,7 +25,7 @@ export default function SyncStatus() {
   if (!pending) return null;
   return (
     <p style={{ background: "#78350f", color: "#fde68a", padding: 8, borderRadius: 8 }}>
-      ⏳ {pending} count{pending > 1 ? "s" : ""} waiting to sync
+      ⏳ {pending} update{pending > 1 ? "s" : ""} waiting to sync
     </p>
   );
 }

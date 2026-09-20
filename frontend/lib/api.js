@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 import { saveItems, loadCachedItems, saveChecks, loadCachedChecks, saveKV, loadKV } from "./itemsCache";
-import { enqueueCheck, flushQueue } from "./offlineQueue";
+import { enqueueCheck, flushQueue, enqueueStatusUpdate, flushStatusQueue } from "./offlineQueue";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -195,4 +195,23 @@ export async function deleteUser(id) {
 }
 export async function getCheckers() {
   return (await apiFetch("/api/checkers")).json();
+}
+async function sendStatusUpdate(update) {
+  return updateRequest(update.requestId, { status: update.status });
+}
+
+export async function submitStatus(requestId, status) {
+  try {
+    return await sendStatusUpdate({ requestId, status });
+  } catch (err) {
+    if (err instanceof TypeError || !navigator.onLine) {
+      await enqueueStatusUpdate({ requestId, status });
+      return { queued: true };
+    }
+    throw err;
+  }
+}
+
+export function syncPendingStatus() {
+  return flushStatusQueue(sendStatusUpdate);
 }

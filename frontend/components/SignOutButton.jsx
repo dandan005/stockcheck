@@ -4,17 +4,33 @@ import { clearCaches } from "../lib/itemsCache";
 import { getPendingCount, clearQueue } from "../lib/offlineQueue";
 import { syncPending } from "../lib/api";
 
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("timed out")), ms)),
+  ]);
+}
+
 export default function SignOutButton() {
   const [busy, setBusy] = useState(false);
 
   async function handleSignOut() {
     setBusy(true);
     try {
-      let pending = await getPendingCount();
+      let pending = 0;
+      try {
+        pending = await withTimeout(getPendingCount(), 3000);
+      } catch {}
+
       if (pending > 0 && navigator.onLine) {
-        try { await syncPending(); } catch {}
-        pending = await getPendingCount();
+        try {
+          await withTimeout(syncPending(), 5000);
+        } catch {}
+        try {
+          pending = await withTimeout(getPendingCount(), 3000);
+        } catch {}
       }
+
       if (
         pending > 0 &&
         !window.confirm(
@@ -23,9 +39,10 @@ export default function SignOutButton() {
       ) {
         return;
       }
+
       await clearQueue();
       await clearCaches();
-      await supabase.auth.signOut({ scope: "local" });
+      await withTimeout(supabase.auth.signOut({ scope: "local" }), 5000);
       window.location.reload();
     } catch (err) {
       alert("Sign out failed: " + err.message);
