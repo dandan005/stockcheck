@@ -66,3 +66,12 @@ export function usePendingChecks() {
   }, []);
   return rows;
 }
+
+export function getPendingCount() {
+  return db.pendingChecks.count();
+}
+
+export async function clearQueue() {
+  await db.pendingChecks.clear();
+  notify();
+}

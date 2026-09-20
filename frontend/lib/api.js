@@ -5,9 +5,13 @@ import { enqueueCheck, flushQueue } from "./offlineQueue";
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 async function authHeaders() {
-  const { data } = await supabase.auth.getSession();
+  if (!navigator.onLine) throw new TypeError("Offline");
+  const { data, error } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  if (!token) throw new Error("Not signed in");
+  if (!token) {
+    if (error?.name === "AuthRetryableFetchError") throw new TypeError("Login server unreachable");
+    throw new Error("Not signed in");
+  }
   return { Authorization: `Bearer ${token}` };
 }
 

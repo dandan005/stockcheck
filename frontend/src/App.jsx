@@ -5,15 +5,19 @@ import ItemsScreen from "../components/ItemsScreen.jsx";
 import RequestsScreen from "../components/RequestsScreen.jsx";
 import CountScreen from "../components/CountScreen.jsx";
 import { getMe } from "../lib/api.js";
+import { useSession } from "../lib/useSession.js";
+import SignOutButton from "../components/SignOutButton.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState("requests");
   const [countRequest, setCountRequest] = useState(null);
+  const { session } = useSession();
 
   useEffect(() => {
+    if (!session) { setUser(null); return; }
     getMe().then(setUser).catch(() => {});
-  }, []);
+  }, [session?.user?.id]);
 
   const tabBtn = (id, label) => (
     <button
@@ -36,6 +40,7 @@ export default function App() {
       <main style={{ padding: 16, minHeight: "100vh", background: "#0f172a", color: "#f8fafc" }}>
         <h1>Stock Check</h1>
         <SyncStatus />
+        <SignOutButton />
         {user && <p style={{ color: "#94a3b8" }}>{user.fullName || user.email} — {user.role}</p>}
 
         {countRequest ? (

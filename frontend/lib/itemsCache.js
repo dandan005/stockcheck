@@ -31,3 +31,11 @@ export async function loadKV(key) {
   const rec = await db.kv.get(key);
   return rec ? rec.value : null;
 }
+
+export async function clearCaches() {
+  await db.transaction("rw", db.items, db.checks, db.kv, async () => {
+    await db.items.clear();
+    await db.checks.clear();
+    await db.kv.clear();
+  });
+}
