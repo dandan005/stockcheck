@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { saveItems, loadCachedItems, saveChecks, loadCachedChecks } from "./itemsCache";
+import { saveItems, loadCachedItems, saveChecks, loadCachedChecks, saveKV, loadKV } from "./itemsCache";
 import { enqueueCheck, flushQueue } from "./offlineQueue";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -28,15 +28,15 @@ export async function apiFetch(path, options = {}) {
   return res;
 }
 
-export async function getMe() {
+async function fetchMe() {
   return (await apiFetch("/api/me")).json();
 }
 
-export async function getUsers() {
+async function fetchUsers() {
   return (await apiFetch("/api/users")).json();
 }
 
-export async function getRequests() {
+async function fetchRequests() {
   return (await apiFetch("/api/requests")).json();
 }
 
@@ -144,3 +144,20 @@ export async function getChecksForRequest(requestId) {
     throw err;
   }
 }
+async function cached(key, fetcher) {
+  try {
+    const data = await fetcher();
+    saveKV(key, data).catch(() => {});
+    return data;
+  } catch (err) {
+    if (err instanceof TypeError || !navigator.onLine) {
+      const saved = await loadKV(key);
+      if (saved !== null) return saved;
+    }
+    throw err;
+  }
+}
+
+export const getMe = () => cached("me", fetchMe);
+export const getUsers = () => cached("users", fetchUsers);
+export const getRequests = () => cached("requests", fetchRequests);
