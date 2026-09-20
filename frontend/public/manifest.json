@@ -27,19 +27,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "shortcuts": [
-    {
-      "name": "New Stock Check",
-      "short_name": "New Check",
-      "url": "/check/new",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Report History",
-      "short_name": "Reports",
-      "url": "/reports",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    }
   ]
 }
