@@ -1,4 +1,3 @@
-cat > ~/storage/shared/HTML/stockcheck-scaffold/README.md
 # Stock Check
 
 A mobile-first PWA for running stock checks: request a count, assign a checker, count items by hand or barcode scan, and get a variance report as an Excel file.
