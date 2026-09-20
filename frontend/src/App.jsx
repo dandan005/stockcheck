@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import SyncStatus from "../components/SyncStatus.jsx";
 import AuthGate from "../components/AuthGate.jsx";
 import ItemsScreen from "../components/ItemsScreen.jsx";
+import UsersScreen from "../components/UsersScreen.jsx";
 import RequestsScreen from "../components/RequestsScreen.jsx";
 import CountScreen from "../components/CountScreen.jsx";
 import { getMe } from "../lib/api.js";
@@ -54,11 +55,14 @@ export default function App() {
             <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
               {tabBtn("requests", "Requests")}
               {tabBtn("items", "Items")}
+              {user?.role === "admin" && tabBtn("users", "Users")}
             </div>
             {tab === "requests" ? (
               <RequestsScreen user={user} onOpenCount={setCountRequest} />
-            ) : (
+            ) : tab === "items" ? (
               <ItemsScreen user={user} />
+            ) : (
+              <UsersScreen user={user} />
             )}
           </>
         )}

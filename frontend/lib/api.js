@@ -176,3 +176,23 @@ export async function updateItem(id, patch) {
 export async function deleteItem(id) {
   await apiFetch(`/api/items/${id}`, { method: "DELETE" });
 }
+export async function createUser(user) {
+  return (await apiFetch("/api/admin/users", {
+    method: "POST",
+    body: JSON.stringify(user),
+  })).json();
+}
+
+export async function updateUser(id, patch) {
+  return (await apiFetch(`/api/admin/users/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(patch),
+  })).json();
+}
+
+export async function deleteUser(id) {
+  await apiFetch(`/api/admin/users/${id}`, { method: "DELETE" });
+}
+export async function getCheckers() {
+  return (await apiFetch("/api/checkers")).json();
+}

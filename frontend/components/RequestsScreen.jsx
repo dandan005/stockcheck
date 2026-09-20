@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRequests, createRequest, updateRequest, getUsers } from "../lib/api.js";
+import { getRequests, createRequest, updateRequest, getCheckers } from "../lib/api.js";
 
 export default function RequestsScreen({ user, onOpenCount }) {
   const [requests, setRequests] = useState([]);
@@ -17,12 +17,9 @@ export default function RequestsScreen({ user, onOpenCount }) {
     setLoading(true);
     setError("");
     try {
-      const [reqs, users] = await Promise.all([
-        getRequests(),
-        isAdmin ? getUsers() : Promise.resolve([]),
-      ]);
+      const [reqs, checkerList] = await Promise.all([getRequests(), getCheckers()]);
       setRequests(reqs);
-      setCheckers(users.filter((u) => u.role === "checker"));
+      setCheckers(checkerList);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -79,20 +76,23 @@ export default function RequestsScreen({ user, onOpenCount }) {
     fontSize: "15px",
   };
 
+  // Requesters can reassign only their own requests; admins can reassign any.
+  function canReassign(r) {
+    return isAdmin || (user?.role === "requester" && r.requested_by === user?.id);
+  }
+
   return (
     <div>
       <h2>Stock Check Requests</h2>
 
       {canCreate && (
         <form onSubmit={handleCreate} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
-          {isAdmin && (
-            <select style={input} value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
-              <option value="">Unassigned</option>
-              {checkers.map((c) => (
-                <option key={c.id} value={c.id}>{c.full_name || c.id}</option>
-              ))}
-            </select>
-          )}
+          <select style={input} value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
+            <option value="">Unassigned</option>
+            {checkers.map((c) => (
+              <option key={c.id} value={c.id}>{c.full_name || c.id}</option>
+            ))}
+          </select>
           <input style={input} placeholder="Notes (optional)" value={notes}
             onChange={(e) => setNotes(e.target.value)} />
           <button type="submit" disabled={saving}
@@ -115,7 +115,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
               <div style={{ fontSize: 13, color: "#94a3b8" }}>
                 Created {new Date(r.created_at).toLocaleDateString()}
               </div>
-              {isAdmin ? (
+              {canReassign(r) ? (
                 <select
                   style={{ ...input, marginTop: 6, fontSize: 13, padding: "6px 8px" }}
                   value={r.assigned_to || ""}

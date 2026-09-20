@@ -6,12 +6,17 @@ import { createClient } from "@supabase/supabase-js";
 
 dotenv.config();
 
-const { PORT = 4000, SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
+const { PORT = 4000, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY. Put them in backend/.env");
   process.exit(1);
 }
+
+// Service-role client: bypasses RLS, used only for admin user management (create/delete auth users).
+const adminClient = SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } })
+  : null;
 
 const app = express();
 app.use(cors());
@@ -179,16 +184,88 @@ app.delete("/api/items/:id", requireAuth, requireRole("admin"), async (req, res)
 /* Users (admin only — used to assign a checker to a request)         */
 /* ------------------------------------------------------------------ */
 
-app.get("/api/users", requireAuth, requireRole("admin"), async (req, res) => {
-  const { data, error } = await req.supabase
+// Lightweight list of checkers, usable by any signed-in user (requesters need this to assign requests).
+app.get("/api/checkers", requireAuth, async (req, res) => {
+  if (!adminClient) return res.status(500).json({ error: "Server missing SUPABASE_SERVICE_ROLE_KEY" });
+  const { data, error } = await adminClient
     .from("profiles")
-    .select("id, full_name, role")
+    .select("id, full_name")
+    .eq("role", "checker")
     .order("full_name");
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
+app.get("/api/users", requireAuth, requireRole("admin"), async (req, res) => {
+  if (!adminClient) return res.status(500).json({ error: "Server missing SUPABASE_SERVICE_ROLE_KEY" });
+  const { data: profiles, error: profileErr } = await adminClient
+    .from("profiles")
+    .select("id, full_name, role")
+    .order("full_name");
+  if (profileErr) return res.status(500).json({ error: profileErr.message });
+
+  const { data: authData, error: authErr } = await adminClient.auth.admin.listUsers();
+  if (authErr) return res.status(500).json({ error: authErr.message });
+
+  const emailById = Object.fromEntries(authData.users.map((u) => [u.id, u.email]));
+  const merged = profiles.map((p) => ({ ...p, email: emailById[p.id] || null }));
+  res.json(merged);
+});
+
 /* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/* Admin: user management (create/edit/delete auth accounts)          */
+/* ------------------------------------------------------------------ */
+
+app.post("/api/admin/users", requireAuth, requireRole("admin"), async (req, res) => {
+  if (!adminClient) return res.status(500).json({ error: "Server missing SUPABASE_SERVICE_ROLE_KEY" });
+  const { email, password, fullName, role } = req.body;
+  if (!email || !password || !role) {
+    return res.status(400).json({ error: "email, password and role are required" });
+  }
+  const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+  if (createErr) return res.status(400).json({ error: createErr.message });
+
+  const { error: profileErr } = await adminClient
+    .from("profiles")
+    .update({ full_name: fullName || null, role })
+    .eq("id", created.user.id);
+  if (profileErr) {
+    await adminClient.auth.admin.deleteUser(created.user.id).catch(() => {});
+    return res.status(400).json({ error: profileErr.message });
+  }
+  res.status(201).json({ id: created.user.id, email, fullName: fullName || null, role });
+});
+
+app.put("/api/admin/users/:id", requireAuth, requireRole("admin"), async (req, res) => {
+  const { fullName, role } = req.body;
+  const patch = {};
+  if (fullName !== undefined) patch.full_name = fullName;
+  if (role !== undefined) patch.role = role;
+  const { data, error } = await req.supabase
+    .from("profiles")
+    .update(patch)
+    .eq("id", req.params.id)
+    .select()
+    .single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+app.delete("/api/admin/users/:id", requireAuth, requireRole("admin"), async (req, res) => {
+  if (!adminClient) return res.status(500).json({ error: "Server missing SUPABASE_SERVICE_ROLE_KEY" });
+  if (req.user.id === req.params.id) {
+    return res.status(400).json({ error: "You can't delete your own account" });
+  }
+  const { error } = await adminClient.auth.admin.deleteUser(req.params.id);
+  if (error) return res.status(400).json({ error: error.message });
+  res.status(204).send();
+});
+
 /* Stock check requests                                                */
 /* ------------------------------------------------------------------ */
 
