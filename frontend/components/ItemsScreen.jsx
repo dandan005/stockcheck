@@ -92,6 +92,7 @@ export default function ItemsScreen({ user }) {
     <div>
       <h2>Items</h2>
 
+      {isAdmin && (
       <form onSubmit={handleAdd} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
         <input style={input} placeholder="SKU" value={form.sku}
           onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
@@ -108,6 +109,7 @@ export default function ItemsScreen({ user }) {
           {saving ? "Adding…" : "Add item"}
         </button>
       </form>
+      )}
 
       {assigningItem && (
         <div style={{ marginBottom: 16 }}>
