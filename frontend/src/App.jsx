@@ -20,29 +20,61 @@ export default function App() {
     getMe().then(setUser).catch(() => {});
   }, [session?.user?.id]);
 
-  const tabBtn = (id, label) => (
-    <button
-      onClick={() => setTab(id)}
-      style={{
-        padding: "10px 16px",
-        border: "none",
-        borderRadius: 8,
-        background: tab === id ? "#2563eb" : "#1e293b",
-        color: "#f8fafc",
-        cursor: "pointer",
-      }}
-    >
-      {label}
-    </button>
-  );
+  const navBtn = (id, icon, label) => {
+    const active = tab === id;
+    return (
+      <button
+        key={id}
+        onClick={() => setTab(id)}
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+          padding: "10px 0 8px",
+          border: "none",
+          background: "transparent",
+          color: active ? "#60a5fa" : "#94a3b8",
+          fontSize: 12,
+          fontWeight: active ? 600 : 400,
+          cursor: "pointer",
+        }}
+      >
+        <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>
+        {label}
+      </button>
+    );
+  };
 
   return (
     <AuthGate>
-      <main style={{ padding: 16, minHeight: "100vh", background: "#0f172a", color: "#f8fafc" }}>
-        <h1>Stock Check</h1>
+      <main
+        style={{
+          padding: 16,
+          paddingBottom: countRequest ? 16 : 88,
+          minHeight: "100vh",
+          background: "#0f172a",
+          color: "#f8fafc",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 4,
+          }}
+        >
+          <h1 style={{ fontSize: 22, margin: 0 }}>Stock Check</h1>
+          <SignOutButton />
+        </div>
+        {user && (
+          <p style={{ color: "#94a3b8", fontSize: 14, margin: "4px 0 12px" }}>
+            {user.fullName || user.email} — {user.role}
+          </p>
+        )}
         <SyncStatus />
-        <SignOutButton />
-        {user && <p style={{ color: "#94a3b8" }}>{user.fullName || user.email} — {user.role}</p>}
 
         {countRequest ? (
           <CountScreen
@@ -50,23 +82,34 @@ export default function App() {
             user={user}
             onBack={() => setCountRequest(null)}
           />
+        ) : tab === "requests" ? (
+          <RequestsScreen user={user} onOpenCount={setCountRequest} />
+        ) : tab === "items" ? (
+          <ItemsScreen user={user} />
         ) : (
-          <>
-            <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-              {tabBtn("requests", "Requests")}
-              {tabBtn("items", "Items")}
-              {user?.role === "admin" && tabBtn("users", "Users")}
-            </div>
-            {tab === "requests" ? (
-              <RequestsScreen user={user} onOpenCount={setCountRequest} />
-            ) : tab === "items" ? (
-              <ItemsScreen user={user} />
-            ) : (
-              <UsersScreen user={user} />
-            )}
-          </>
+          <UsersScreen user={user} />
         )}
       </main>
+
+      {!countRequest && (
+        <nav
+          style={{
+            position: "fixed",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            background: "#111827",
+            borderTop: "1px solid #1e293b",
+            paddingBottom: "env(safe-area-inset-bottom, 0px)",
+            zIndex: 10,
+          }}
+        >
+          {navBtn("requests", "📋", "Requests")}
+          {navBtn("items", "📦", "Items")}
+          {user?.role === "admin" && navBtn("users", "👥", "Users")}
+        </nav>
+      )}
     </AuthGate>
   );
 }
