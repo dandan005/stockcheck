@@ -11,6 +11,7 @@ export default function ItemsScreen({ user }) {
   const [saving, setSaving] = useState(false);
   const [assigningId, setAssigningId] = useState(null);
   const [search, setSearch] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -145,7 +146,7 @@ export default function ItemsScreen({ user }) {
     <div>
       <h2>Items</h2>
 
-      {isAdmin && !editingId && (
+      {isAdmin && !editingId && !q && !searchFocused && (
       <form onSubmit={handleAdd} style={{ display: "grid", gap: 8, marginBottom: 20, maxWidth: 360 }}>
         <input style={input} placeholder="SKU" value={form.sku}
           onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
@@ -176,6 +177,8 @@ export default function ItemsScreen({ user }) {
         placeholder="Search by SKU, name, or barcode…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        onFocus={() => setSearchFocused(true)}
+        onBlur={() => setSearchFocused(false)}
       />
 
       {error && <p style={{ color: "#f87171" }}>{error}</p>}

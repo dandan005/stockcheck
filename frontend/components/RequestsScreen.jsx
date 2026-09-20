@@ -133,19 +133,19 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   </div>
                 )
               )}
-              {r.status === "open" && (user?.id === r.assigned_to || isAdmin) && (
+              {r.status === "open" && user?.id === r.assigned_to && (
                 <button onClick={() => handleStatus(r.id, "in_progress")}
                   style={{ ...input, marginTop: 6, cursor: "pointer" }}>
                   Start
                 </button>
               )}
-              {r.status === "in_progress" && (user?.id === r.assigned_to || isAdmin) && (
+              {r.status === "in_progress" && user?.id === r.assigned_to && (
                 <button onClick={() => handleStatus(r.id, "completed")}
                   style={{ ...input, marginTop: 6, cursor: "pointer" }}>
                   Mark complete
                 </button>
               )}
-              {r.status === "in_progress" && (user?.id === r.assigned_to || isAdmin) && (
+              {r.status === "in_progress" && user?.id === r.assigned_to && (
                 <button onClick={() => onOpenCount?.(r)}
                   style={{ ...input, marginTop: 6, marginLeft: 6, background: "#2563eb", border: "none", cursor: "pointer" }}>
                   Count items
