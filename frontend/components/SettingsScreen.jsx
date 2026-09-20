@@ -61,7 +61,7 @@ function Row({ label, value }) {
   );
 }
 
-export default function SettingsScreen({ user }) {
+export default function SettingsScreen({ user, onReplayTour }) {
   const pendingChecks = usePendingCount();
   const pendingStatus = usePendingStatusCount();
   const pending = pendingChecks + pendingStatus;
@@ -211,6 +211,12 @@ export default function SettingsScreen({ user }) {
         <div style={{ ...muted, marginTop: 10 }}>
           Refresh the item list while online before counting somewhere with weak signal.
         </div>
+      </Card>
+
+      <Card title="Help">
+        <button style={btn} onClick={onReplayTour}>
+          Replay the walkthrough
+        </button>
       </Card>
 
       <Card title="Install app">

@@ -9,6 +9,8 @@ import SettingsScreen from "../components/SettingsScreen.jsx";
 import CountScreen from "../components/CountScreen.jsx";
 import AppHeader from "../components/AppHeader.jsx";
 import PageIntro from "../components/PageIntro.jsx";
+import Splash from "../components/Splash.jsx";
+import Walkthrough from "../components/Walkthrough.jsx";
 import { getMe } from "../lib/api.js";
 import { useSession } from "../lib/useSession.js";
 
@@ -88,6 +90,27 @@ export default function App() {
   const [tab, setTab] = useState("requests");
   const [countRequest, setCountRequest] = useState(null);
   const { session } = useSession();
+  const [splash, setSplash] = useState(true);
+  const [tour, setTour] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setSplash(false), 1400);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (splash || !user?.id) return;
+    try {
+      if (!localStorage.getItem("sc_tour_" + user.id)) setTour(true);
+    } catch {}
+  }, [splash, user?.id]);
+
+  function closeTour() {
+    setTour(false);
+    try {
+      if (user?.id) localStorage.setItem("sc_tour_" + user.id, "1");
+    } catch {}
+  }
 
   useEffect(() => {
     if (!session) { setUser(null); return; }
@@ -137,7 +160,9 @@ export default function App() {
   };
 
   return (
-    <AuthGate>
+    <>
+      {splash && <Splash />}
+      <AuthGate>
       <main
         style={{
           padding: 16,
@@ -174,7 +199,7 @@ export default function App() {
             ) : tab === "completed" ? (
               <CompletedScreen />
             ) : tab === "settings" ? (
-              <SettingsScreen user={user} />
+              <SettingsScreen user={user} onReplayTour={() => setTour(true)} />
             ) : tab === "items" ? (
               <ItemsScreen user={user} />
             ) : (
@@ -206,5 +231,7 @@ export default function App() {
         </nav>
       )}
     </AuthGate>
+      {tour && <Walkthrough role={user?.role} onClose={closeTour} />}
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import splashIcon from "../lib/splashIcon.js";
 import { useState } from "react";
 import SignOutButton from "./SignOutButton.jsx";
 
@@ -54,7 +55,18 @@ export default function AppHeader({ user }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-        <div style={emblem}>📦</div>
+        <img
+          src={splashIcon}
+          alt=""
+          style={{
+            width: 44,
+            height: 44,
+            flexShrink: 0,
+            borderRadius: 10,
+            objectFit: "contain",
+            boxShadow: "0 0 14px rgba(250, 204, 21, 0.35)",
+          }}
+        />
         <div style={{ minWidth: 0 }}>
           <div
             style={{

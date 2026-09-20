@@ -1,12 +1,20 @@
 import LoadingCards from "./LoadingCards.jsx";
-import { useEffect, useState } from "react";
-import { getRequests, createRequest, updateRequest, getCheckers, submitStatus } from "../lib/api.js";
+import { useEffect, useState, useRef } from "react";
+import { getRequests, createRequest, updateRequest, getCheckers, submitStatus, getChecksForRequest } from "../lib/api.js";
 
 export default function RequestsScreen({ user, onOpenCount }) {
   const [requests, setRequests] = useState([]);
   const [checkers, setCheckers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [rowError, setRowError] = useState(null);
+  const rowErrorTimeout = useRef(null);
+
+  function showRowError(id, message) {
+    if (rowErrorTimeout.current) clearTimeout(rowErrorTimeout.current);
+    setRowError({ id, message });
+    rowErrorTimeout.current = setTimeout(() => setRowError(null), 5000);
+  }
   const [assignedTo, setAssignedTo] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -49,14 +57,25 @@ export default function RequestsScreen({ user, onOpenCount }) {
   }
 
   async function handleStatus(id, status) {
-    setError("");
+    if (status === "completed") {
+      try {
+        const checks = await getChecksForRequest(id);
+        if (!checks || checks.length === 0) {
+          showRowError(id, "Count at least one item before marking this complete.");
+          return;
+        }
+      } catch (err) {
+        showRowError(id, err.message);
+        return;
+      }
+    }
     // Optimistic local update so Start/Complete reflect immediately even offline
     // (an offline reload would otherwise show stale cached data).
     setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
     try {
       await submitStatus(id, status);
     } catch (err) {
-      setError(err.message);
+      showRowError(id, err.message);
       await load(); // roll back to server truth if the update genuinely failed
     }
   }
@@ -91,6 +110,11 @@ export default function RequestsScreen({ user, onOpenCount }) {
     open: { bg: "#1e3a8a", fg: "#93c5fd" },
     in_progress: { bg: "#78350f", fg: "#fcd34d" },
     completed: { bg: "#14532d", fg: "#86efac" },
+  };
+  const accent = {
+    open: "#3b82f6",
+    in_progress: "#f59e0b",
+    completed: "#22c55e",
   };
   const card = {
     background: "#111827",
@@ -161,9 +185,10 @@ export default function RequestsScreen({ user, onOpenCount }) {
       ) : (
         visible.map((r) => {
           const c = pill[r.status] || pill.open;
+          const a = accent[r.status] || accent.open;
           const mine = user?.id === r.assigned_to;
           return (
-            <div key={r.id} style={card}>
+            <div key={r.id} style={{ ...card, borderLeft: "3px solid " + a }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
                 <strong style={{ fontSize: 16 }}>{r.notes || "Stock check"}</strong>
                 <span
@@ -215,6 +240,11 @@ export default function RequestsScreen({ user, onOpenCount }) {
                       </button>
                     </>
                   )}
+                </div>
+              )}
+              {rowError && rowError.id === r.id && (
+                <div style={{ fontSize: 13, color: "#f87171", marginTop: 8 }}>
+                  {rowError.message}
                 </div>
               )}
             </div>
