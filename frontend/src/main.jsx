@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "../index.css";
 
 function showError(label, err) {
   var pre = document.createElement("pre");
