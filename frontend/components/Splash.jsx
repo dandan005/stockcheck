@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 export default function Splash() {
   const [leaving, setLeaving] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setLeaving(true), 1050);
+    const t = setTimeout(() => setLeaving(true), 3000);
     return () => clearTimeout(t);
   }, []);
   return (

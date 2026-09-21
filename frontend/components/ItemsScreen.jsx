@@ -123,6 +123,7 @@ export default function ItemsScreen({ user }) {
   }
 
   const [addOpen, setAddOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(200);
 
   const input = {
     padding: "10px",
@@ -238,7 +239,7 @@ export default function ItemsScreen({ user }) {
           style={{ ...input, width: "100%", boxSizing: "border-box" }}
           placeholder="🔍  Search by SKU, name, or barcode…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setVisibleCount(200); }}
         />
       </div>
 
@@ -255,7 +256,7 @@ export default function ItemsScreen({ user }) {
             {q ? filteredItems.length + " of " + items.length + " items" : items.length + " items"}
           </div>
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {filteredItems.slice(0, 200).map((it) => (
+            {filteredItems.slice(0, visibleCount).map((it) => (
               <li key={it.id} className="sc-card" style={{ padding: 12, marginBottom: 10 }}>
                 {editingId === it.id ? (
                   <div style={{ display: "grid", gap: 6 }}>
@@ -318,8 +319,13 @@ export default function ItemsScreen({ user }) {
               </li>
             ))}
           </ul>
-          {filteredItems.length > 200 && (
-            <p style={{ color: "#94a3b8" }}>Showing first 200 — keep typing to narrow it down.</p>
+          {filteredItems.length > visibleCount && (
+            <button
+              onClick={() => setVisibleCount((c) => c + 200)}
+              style={{ ...input, padding: "10px 14px", cursor: "pointer", width: "100%", background: "#1e293b", border: "1px solid #334155", fontWeight: 600 }}
+            >
+              Load more ({filteredItems.length - visibleCount} remaining)
+            </button>
           )}
         </>
       )}

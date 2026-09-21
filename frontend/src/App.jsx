@@ -94,7 +94,7 @@ export default function App() {
   const [tour, setTour] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setSplash(false), 1400);
+    const t = setTimeout(() => setSplash(false), 3000);
     return () => clearTimeout(t);
   }, []);
 
