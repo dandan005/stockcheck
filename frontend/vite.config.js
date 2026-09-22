@@ -13,6 +13,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,json,png,svg,ico}"],
         navigateFallback: "index.html",
         mode: "development",
+        importScripts: ["push-sw.js"],
       },
     }),
   ],

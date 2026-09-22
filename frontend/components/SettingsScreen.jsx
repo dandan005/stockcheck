@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
 import { syncPending, syncPendingStatus, getItems } from "../lib/api.js";
+import { subscribeToPush } from "../lib/api.js";
 import { usePendingCount, usePendingStatusCount } from "../lib/offlineQueue.js";
 import SignOutButton from "./SignOutButton.jsx";
 import pkg from "../package.json";
@@ -138,6 +139,22 @@ export default function SettingsScreen({ user, onReplayTour }) {
     setPwMsg({ ok: true, text: "Password changed." });
   }
 
+  const [pushMsg, setPushMsg] = useState("");
+  const [pushBusy, setPushBusy] = useState(false);
+
+  async function enablePush() {
+    setPushBusy(true);
+    setPushMsg("");
+    try {
+      await subscribeToPush();
+      setPushMsg("Notifications enabled");
+    } catch (e) {
+      setPushMsg(e.message || "Failed to enable notifications");
+    } finally {
+      setPushBusy(false);
+    }
+  }
+
   async function install() {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
@@ -155,9 +172,20 @@ export default function SettingsScreen({ user, onReplayTour }) {
         <div style={{ marginTop: 12 }}>
           <SignOutButton />
         </div>
-      </Card>
+        </Card>
 
-      <Card title="Change password">
+        <Card title="Notifications">
+          <button
+            onClick={enablePush}
+            disabled={pushBusy}
+            style={{ ...input, width: "100%", fontWeight: 600, cursor: "pointer", background: "#2563eb", border: "none" }}
+          >
+            {pushBusy ? "Enabling…" : "Enable notifications"}
+          </button>
+          {pushMsg && <p style={{ marginTop: 8, color: pushMsg.includes("enabled") ? "#4ade80" : "#f87171" }}>{pushMsg}</p>}
+        </Card>
+
+        <Card title="Change password">
         <form onSubmit={changePassword} style={{ display: "grid", gap: 8 }}>
           <input
             style={input}

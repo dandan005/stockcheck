@@ -166,6 +166,54 @@ export const getMe = () => cached("me", fetchMe);
 export const getUsers = () => cached("users", fetchUsers);
 export const getRequests = () => cached("requests", fetchRequests);
 
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+}
+
+export async function subscribeToPush() {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    throw new Error("Push notifications not supported on this device");
+  }
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    throw new Error("Notification permission denied");
+  }
+  const reg = await navigator.serviceWorker.ready;
+  const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+  if (!vapidKey) throw new Error("Missing VAPID public key");
+
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidKey),
+    });
+  }
+
+  await apiFetch("/api/push/subscribe", {
+    method: "POST",
+    body: JSON.stringify({
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: arrayBufferToBase64(sub.getKey("p256dh")),
+        auth: arrayBufferToBase64(sub.getKey("auth")),
+      },
+    }),
+  });
+
+  return sub;
+}
+
 export async function updateItem(id, patch) {
   return (await apiFetch(`/api/items/${id}`, {
     method: "PUT",
