@@ -126,13 +126,19 @@ export default function RequestsScreen({ user, onOpenCount }) {
   const smallBtn = { ...input, padding: "8px 12px", fontSize: 14, cursor: "pointer" };
   const primaryBtn = { ...smallBtn, background: "#2563eb", border: "none" };
   const nameOf = (id) => checkers.find((c) => c.id === id)?.full_name || id;
+  const [newRequestOpen, setNewRequestOpen] = useState(false);
 
   return (
     <div>
 
       {canCreate && (
-        <form onSubmit={handleCreate} style={{ ...card, display: "grid", gap: 8, marginBottom: 20 }}>
-          <div style={{ fontWeight: 600 }}>New request</div>
+        <>
+          <button type="button" onClick={() => setNewRequestOpen(!newRequestOpen)} style={primaryBtn}>
+            {newRequestOpen ? "Close" : "+ New request"}
+          </button>
+          {newRequestOpen && (
+          <form onSubmit={handleCreate} style={{ ...card, display: "grid", gap: 8, marginBottom: 20 }}>
+            <div style={{ fontWeight: 600 }}>New request</div>
           <select style={input} value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
             <option value="">Unassigned</option>
             {checkers.map((c) => (
@@ -148,7 +154,9 @@ export default function RequestsScreen({ user, onOpenCount }) {
           <button type="submit" disabled={saving} style={primaryBtn}>
             {saving ? "Creating…" : "Create request"}
           </button>
-        </form>
+          </form>
+          )}
+        </>
       )}
 
       {error && <p style={{ color: "#f87171" }}>{error}</p>}
