@@ -197,7 +197,7 @@ export default function App() {
             {tab === "requests" ? (
               <RequestsScreen user={user} onOpenCount={setCountRequest} />
             ) : tab === "completed" ? (
-              <CompletedScreen />
+              <CompletedScreen user={user} />
             ) : tab === "settings" ? (
               <SettingsScreen user={user} onReplayTour={() => setTour(true)} />
             ) : tab === "items" ? (
