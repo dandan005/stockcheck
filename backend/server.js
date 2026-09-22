@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import ExcelJS from "exceljs";
 import { createClient } from "@supabase/supabase-js";
+import webpush from "web-push";
 
 dotenv.config();
 
@@ -358,5 +359,66 @@ app.post("/api/checks", requireAuth, async (req, res) => {
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json(data);
 });
+
+const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT } = process.env;
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_SUBJECT) {
+  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  console.log("Web push configured");
+} else {
+  console.warn("Web push NOT configured - missing VAPID env vars");
+}
+
+app.post("/api/push/subscribe", requireAuth, async (req, res) => {
+  const { endpoint, keys } = req.body || {};
+  if (!endpoint || !keys?.p256dh || !keys?.auth) {
+    return res.status(400).json({ error: "Invalid subscription" });
+  }
+  const { error } = await req.supabase.from("push_subscriptions").upsert(
+    { user_id: req.user.id, endpoint, p256dh: keys.p256dh, auth: keys.auth },
+    { onConflict: "endpoint" }
+  );
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ ok: true });
+});
+
+if (adminClient && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  adminClient
+    .channel("push-notify")
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "notifications" },
+      async (payload) => {
+        const notif = payload.new;
+        try {
+          const { data: subs } = await adminClient
+            .from("push_subscriptions")
+            .select("*")
+            .eq("user_id", notif.user_id);
+          for (const sub of subs || []) {
+            const subscription = {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh, auth: sub.auth },
+            };
+            const payloadStr = JSON.stringify({
+              title: "Stock Check",
+              body: notif.message,
+              url: "/",
+            });
+            webpush.sendNotification(subscription, payloadStr).catch(async (err) => {
+              if (err.statusCode === 404 || err.statusCode === 410) {
+                await adminClient.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+              } else {
+                console.error("Push send error:", err.message);
+              }
+            });
+          }
+        } catch (e) {
+          console.error("Push notify handler error:", e.message);
+        }
+      }
+    )
+    .subscribe();
+  console.log("Listening for new notifications to push");
+}
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
