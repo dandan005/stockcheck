@@ -133,9 +133,21 @@ export default function RequestsScreen({ user, onOpenCount }) {
 
       {canCreate && (
         <>
-          <button type="button" onClick={() => setNewRequestOpen(!newRequestOpen)} style={primaryBtn}>
-            {newRequestOpen ? "Close" : "+ New request"}
-          </button>
+          <div style={{ marginBottom: 12 }}>
+            <button
+              onClick={() => setNewRequestOpen((o) => !o)}
+              style={{
+                ...input,
+                width: "100%",
+                fontWeight: 600,
+                cursor: "pointer",
+                background: newRequestOpen ? "#1e293b" : "#2563eb",
+                border: newRequestOpen ? "1px solid #334155" : "none",
+              }}
+            >
+              {newRequestOpen ? "Close" : "+ New request"}
+            </button>
+          </div>
           {newRequestOpen && (
           <form onSubmit={handleCreate} style={{ ...card, display: "grid", gap: 8, marginBottom: 20 }}>
             <div style={{ fontWeight: 600 }}>New request</div>
