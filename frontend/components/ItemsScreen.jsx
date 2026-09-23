@@ -301,7 +301,6 @@ export default function ItemsScreen({ user }) {
                     <div style={{ fontWeight: 700, fontSize: 15, margin: "8px 0 6px" }}>{it.name}</div>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       <span style={tag}>📍 {it.location || "no location"}</span>
-                      <span style={tag}>Expected {it.expected_qty}</span>
                     </div>
                     {isAdmin && (
                       <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>

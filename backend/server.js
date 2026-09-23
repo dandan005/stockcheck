@@ -76,22 +76,11 @@ async function generateStockReport(checkData) {
   sheet.columns = [
     { header: "SKU", key: "sku", width: 15 },
     { header: "Name", key: "name", width: 25 },
-    { header: "Location", key: "location", width: 15 },
-    { header: "Expected Qty", key: "expectedQty", width: 15 },
+    { header: "Location", key: "location", width: 30 },
     { header: "Counted Qty", key: "countedQty", width: 15 },
-    { header: "Variance", key: "variance", width: 12 },
   ];
 
   checkData.forEach((row) => sheet.addRow(row));
-
-  // Highlight rows with a variance
-  sheet.eachRow((row, rowNumber) => {
-    if (rowNumber === 1) return;
-    const variance = row.getCell("variance").value;
-    if (variance !== 0) {
-      row.getCell("variance").font = { color: { argb: "FFCC0000" }, bold: true };
-    }
-  });
 
   return workbook.xlsx.writeBuffer();
 }

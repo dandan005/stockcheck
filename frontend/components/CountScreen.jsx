@@ -157,7 +157,7 @@ export default function CountScreen({ request, onBack }) {
           )}
         </div>
         {selectedItem && (
-          <p style={{ color: "#94a3b8", margin: 0 }}>Expected: {selectedItem.expected_qty}</p>
+          <p style={{ color: "#94a3b8", margin: 0 }}>📍 {selectedItem.location || "no location"}</p>
         )}
         <input style={input} type="number" placeholder="Counted qty" value={countedQty}
           onChange={(e) => setCountedQty(e.target.value)} required />
@@ -174,11 +174,10 @@ export default function CountScreen({ request, onBack }) {
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {pending.map((p) => {
             const it = items.find((x) => x.id === p.itemId);
-            const variance = it ? p.countedQty - it.expected_qty : null;
             return (
               <li key={p.itemId} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b", color: "#fde68a" }}>
                 ⏳ <strong>{it?.sku ?? "item"}</strong> — {it?.name}: counted {p.countedQty}
-                {variance !== null && variance !== 0 && ` (variance ${variance})`} — waiting to sync
+                {it?.location && ` · 📍 ${it.location}`} — waiting to sync
               </li>
             );
           })}
@@ -190,8 +189,8 @@ export default function CountScreen({ request, onBack }) {
         <ul style={{ listStyle: "none", padding: 0 }}>
           {checks.map((c) => (
             <li key={c.id} style={{ padding: "8px 0", borderBottom: "1px solid #1e293b" }}>
-              <strong>{c.items?.sku}</strong> — {c.items?.name}: expected {c.expected_qty}, counted {c.counted_qty}
-              {c.variance !== 0 && <span style={{ color: "#f87171" }}> (variance {c.variance})</span>}
+              <strong>{c.items?.sku}</strong> — {c.items?.name}: counted {c.counted_qty}
+              {c.items?.location && <span style={{ color: "#94a3b8" }}> · 📍 {c.items.location}</span>}
             </li>
           ))}
         </ul>

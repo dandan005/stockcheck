@@ -11,15 +11,12 @@ import {
 function toReportRows(checks) {
   return checks
     .map((c) => {
-      const expected = Number(c.expected_qty ?? 0);
       const counted = Number(c.counted_qty ?? 0);
       return {
         sku: c.items?.sku ?? "",
         name: c.items?.name ?? "",
         location: c.items?.location ?? "",
-        expectedQty: expected,
         countedQty: counted,
-        variance: counted - expected,
       };
     })
     .sort((a, b) => a.sku.localeCompare(b.sku));
@@ -154,7 +151,6 @@ export default function CompletedScreen({ user }) {
       ) : (
         requests.map((r) => {
           const rows = rowsById[r.id];
-          const diffs = rows ? rows.filter((x) => x.variance !== 0).length : 0;
           const expanded = expandedId === r.id;
           return (
             <div
