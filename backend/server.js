@@ -140,12 +140,12 @@ app.get("/api/items", requireAuth, async (req, res) => {
 });
 
 app.post("/api/items", requireAuth, requireRole("admin"), async (req, res) => {
-  const { sku, name, barcode, category, unit, location, expectedQty } = req.body;
+  const { sku, name, barcode, category, unit, location } = req.body;
   if (!sku || !name) return res.status(400).json({ error: "sku and name are required" });
 
   const { data, error } = await req.supabase
     .from("items")
-    .insert({ sku, name, barcode, category, unit, location, expected_qty: expectedQty ?? 0 })
+    .insert({ sku, name, barcode, category, unit, location })
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
@@ -153,10 +153,10 @@ app.post("/api/items", requireAuth, requireRole("admin"), async (req, res) => {
 });
 
 app.put("/api/items/:id", requireAuth, requireRole("admin"), async (req, res) => {
-  const { sku, name, barcode, category, unit, location, expectedQty } = req.body;
+  const { sku, name, barcode, category, unit, location } = req.body;
   const { data, error } = await req.supabase
     .from("items")
-    .update({ sku, name, barcode, category, unit, location, expected_qty: expectedQty })
+    .update({ sku, name, barcode, category, unit, location })
     .eq("id", req.params.id)
     .select()
     .single();
@@ -328,7 +328,7 @@ app.post("/api/checks", requireAuth, async (req, res) => {
 
   const { data: item, error: itemErr } = await req.supabase
     .from("items")
-    .select("expected_qty")
+    .select("id")
     .eq("id", itemId)
     .single();
   if (itemErr) return res.status(400).json({ error: "Item not found" });
@@ -340,7 +340,7 @@ app.post("/api/checks", requireAuth, async (req, res) => {
         request_id: requestId,
         item_id: itemId,
         checked_by: req.user.id,
-        expected_qty: item.expected_qty,
+        expected_qty: 0,
         counted_qty: Number(countedQty),
         method: method || "manual",
       },
