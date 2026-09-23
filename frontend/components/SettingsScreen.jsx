@@ -266,8 +266,7 @@ export default function SettingsScreen({ user, onReplayTour }) {
         <Row label="App" value="Stock Check" />
         <Row label="Version" value={pkg.version} />
         <div style={{ marginTop: 12, marginBottom: 6, fontSize: 13, color: "#94a3b8" }}>
-          Request stock checks, count items by hand or barcode scan, and get
-          a variance report — built for this workplace's inventory workflow.
+          Request stock checks, count items by hand or barcode scan — built for this workplace's inventory workflow.
         </div>
         <div style={{ marginTop: 12, fontWeight: 600, fontSize: 13 }}>Built with</div>
         <Row label="Frontend" value="React 18, Vite, Dexie, html5-qrcode" />

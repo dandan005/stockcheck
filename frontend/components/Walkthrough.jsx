@@ -7,7 +7,7 @@ function stepsFor(role) {
     {
       icon: "👋",
       title: "Welcome to Stock Check",
-      text: "Request stock checks, count items with your phone and get a variance report. Here's a 30-second tour.",
+      text: "Request stock checks, count items with your phone. Here's a 30-second tour.",
     },
     checker
       ? {
