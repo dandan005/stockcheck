@@ -8,8 +8,7 @@ export default function ItemsScreen({ user }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const LOCATIONS = ["Ground floor", "Ground floor office", "Mezzanine", "2nd floor", "3rd floor", "Warehouse 2", "Special order", "Sample stock"];
-  const [form, setForm] = useState({ sku: "", name: "", barcode: "", location: "", expectedQty: 0 });
+    const [form, setForm] = useState({ sku: "", name: "", barcode: "", location: "" });
   const [saving, setSaving] = useState(false);
   const [assigningId, setAssigningId] = useState(null);
   const [search, setSearch] = useState("");
@@ -40,8 +39,8 @@ export default function ItemsScreen({ user }) {
     setSaving(true);
     setError("");
     try {
-      await createItem({ ...form, barcode: form.barcode.trim() || null, expectedQty: Number(form.expectedQty) || 0 });
-      setForm({ sku: "", name: "", barcode: "", location: "", expectedQty: 0 });
+      await createItem({ ...form, barcode: form.barcode.trim() || null });
+      setForm({ sku: "", name: "", barcode: "", location: "" });
       await load();
     } catch (err) {
       setError(err.message);
@@ -82,7 +81,6 @@ export default function ItemsScreen({ user }) {
       name: it.name,
       barcode: it.barcode || "",
       location: it.location || "",
-      expectedQty: it.expected_qty ?? 0,
     });
   }
 
@@ -98,7 +96,6 @@ export default function ItemsScreen({ user }) {
       await updateItem(id, {
         ...editForm,
         barcode: editForm.barcode.trim() || null,
-        expectedQty: Number(editForm.expectedQty) || 0,
       });
       cancelEdit();
       await load();
@@ -206,14 +203,8 @@ export default function ItemsScreen({ user }) {
                 onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
               <input style={input} placeholder="Name" value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-              <select style={input} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}>
-                    <option value="">Select location</option>
-                    {LOCATIONS.map((loc) => (
-                      <option key={loc} value={loc}>{loc}</option>
-                    ))}
-                  </select>
-              <input style={input} type="number" placeholder="Expected qty" value={form.expectedQty}
-                onChange={(e) => setForm({ ...form, expectedQty: e.target.value })} />
+              <input style={input} placeholder="Location (e.g. Ground floor, at the back of Bolton Bowl)" value={form.location}
+                  onChange={(e) => setForm({ ...form, location: e.target.value })} />
               <button type="submit" disabled={saving}
                 style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer" }}>
                 {saving ? "Adding…" : "Save item"}
@@ -271,14 +262,8 @@ export default function ItemsScreen({ user }) {
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
                     <input style={input} placeholder="Barcode (optional)" value={editForm.barcode}
                       onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })} />
-                    <select style={input} value={editForm.location} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}>
-                    <option value="">Select location</option>
-                    {LOCATIONS.map((loc) => (
-                      <option key={loc} value={loc}>{loc}</option>
-                    ))}
-                  </select>
-                    <input style={input} type="number" placeholder="Expected qty" value={editForm.expectedQty}
-                      onChange={(e) => setEditForm({ ...editForm, expectedQty: e.target.value })} />
+                    <input style={input} placeholder="Location (e.g. Ground floor, at the back of Bolton Bowl)" value={editForm.location}
+                      onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} />
                     <div style={{ display: "flex", gap: 8 }}>
                       <button
                         onClick={() => handleSaveEdit(it.id)}
