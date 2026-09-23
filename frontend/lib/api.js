@@ -241,9 +241,10 @@ export async function updateUser(id, patch) {
 export async function deleteUser(id) {
   await apiFetch(`/api/admin/users/${id}`, { method: "DELETE" });
 }
-export async function getCheckers() {
+async function fetchCheckers() {
   return (await apiFetch("/api/checkers")).json();
 }
+export const getCheckers = () => cached("checkers", fetchCheckers);
 async function sendStatusUpdate(update) {
   return updateRequest(update.requestId, { status: update.status });
 }

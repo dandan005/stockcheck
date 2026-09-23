@@ -1,10 +1,12 @@
 import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState, useRef } from "react";
 import { getRequests, createRequest, updateRequest, getCheckers, submitStatus, getChecksForRequest } from "../lib/api.js";
+import { usePendingChecks } from "../lib/offlineQueue.js";
 
 export default function RequestsScreen({ user, onOpenCount }) {
   const [requests, setRequests] = useState([]);
   const [checkers, setCheckers] = useState([]);
+  const pendingChecks = usePendingChecks();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [rowError, setRowError] = useState(null);
@@ -58,15 +60,20 @@ export default function RequestsScreen({ user, onOpenCount }) {
 
   async function handleStatus(id, status) {
     if (status === "completed") {
-      try {
-        const checks = await getChecksForRequest(id);
-        if (!checks || checks.length === 0) {
-          showRowError(id, "Count at least one item before marking this complete.");
+      const hasPendingForThis = pendingChecks.some(
+        (c) => (c.requestId ?? c.request_id) === id
+      );
+      if (!hasPendingForThis) {
+        try {
+          const checks = await getChecksForRequest(id);
+          if (!checks || checks.length === 0) {
+            showRowError(id, "Count at least one item before marking this complete.");
+            return;
+          }
+        } catch (err) {
+          showRowError(id, err.message);
           return;
         }
-      } catch (err) {
-        showRowError(id, err.message);
-        return;
       }
     }
     // Optimistic local update so Start/Complete reflect immediately even offline
