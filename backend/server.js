@@ -263,7 +263,10 @@ app.delete("/api/admin/users/:id", requireAuth, requireRole("admin"), async (req
     return res.status(400).json({ error: "You can't delete your own account" });
   }
   const { error } = await adminClient.auth.admin.deleteUser(req.params.id);
-  if (error) return res.status(400).json({ error: error.message });
+  if (error) {
+    console.error("deleteUser failed:", JSON.stringify(error, null, 2));
+    return res.status(400).json({ error: error.message });
+  }
   res.status(204).send();
 });
 
