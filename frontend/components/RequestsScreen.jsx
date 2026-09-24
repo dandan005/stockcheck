@@ -22,6 +22,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editNotes, setEditNotes] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   const isAdmin = user?.role === "admin";
   const canCreate = isAdmin || user?.role === "requester";
@@ -250,32 +251,63 @@ export default function RequestsScreen({ user, onOpenCount }) {
                 ) : (
                   <strong style={{ fontSize: 16 }}>{r.notes || "Stock check"}</strong>
                 )}
-                <span
-                  style={{
-                    fontSize: 12,
-                    padding: "2px 8px",
-                    borderRadius: 999,
-                    background: c.bg,
-                    color: c.fg,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {r.status.replace("_", " ")}
-                </span>
-              </div>
-              {canReassign(r) && (
-                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                  {editingId === r.id ? (
-                    <>
-                      <button onClick={() => handleEditSave(r.id)} style={primaryBtn}>Save</button>
-                      <button onClick={() => setEditingId(null)} style={smallBtn}>Cancel</button>
-                    </>
-                  ) : (
-                    <>
-                      <button onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); }} style={smallBtn}>Edit</button>
-                      <button onClick={() => handleDelete(r.id)} style={{ ...smallBtn, color: "#f87171", borderColor: "#7f1d1d" }}>Delete</button>
-                    </>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      background: c.bg,
+                      color: c.fg,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {r.status.replace("_", " ")}
+                  </span>
+                  {canReassign(r) && (
+                    <div style={{ position: "relative" }}>
+                      <button
+                        onClick={() => setOpenMenuId(openMenuId === r.id ? null : r.id)}
+                        style={{ ...smallBtn, padding: "4px 10px" }}
+                      >
+                        ⋮
+                      </button>
+                      {openMenuId === r.id && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            right: 0,
+                            top: "110%",
+                            background: "#1e293b",
+                            border: "1px solid #334155",
+                            borderRadius: 8,
+                            overflow: "hidden",
+                            zIndex: 10,
+                            minWidth: 110,
+                          }}
+                        >
+                          <button
+                            onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
+                            style={{ display: "block", width: "100%", padding: "8px 12px", background: "none", border: "none", color: "#f8fafc", textAlign: "left", cursor: "pointer" }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
+                            style={{ display: "block", width: "100%", padding: "8px 12px", background: "none", border: "none", color: "#f87171", textAlign: "left", cursor: "pointer" }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
+                </div>
+              </div>
+              {editingId === r.id && (
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  <button onClick={() => handleEditSave(r.id)} style={primaryBtn}>Save</button>
+                  <button onClick={() => setEditingId(null)} style={smallBtn}>Cancel</button>
                 </div>
               )}
               <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>
