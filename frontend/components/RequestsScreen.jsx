@@ -241,9 +241,9 @@ export default function RequestsScreen({ user, onOpenCount }) {
           const mine = user?.id === r.assigned_to;
           const { margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, ...cardBase } = card;
           return (
-            <div key={r.id} style={{ display: "flex", overflow: "hidden", margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, borderRadius: card.borderRadius }}>
+            <div key={r.id} style={{ display: "flex", overflow: openMenuId === r.id && canReassign(r) ? "hidden" : "visible", margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, borderRadius: card.borderRadius }}>
               {canReassign(r) && (
-                <div style={{ order: 2, flex: "none", overflow: "hidden", display: "flex", width: canReassign(r) && openMenuId === r.id ? 132 : 0, transition: "width 0.2s ease" }}>
+                <div style={{ order: 2, flex: "none", overflow: "hidden", display: canReassign(r) && openMenuId === r.id ? "flex" : "none", width: 132 }}>
                   <button
                     onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
                     style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#2563eb", color: "#fff", fontSize: 14, cursor: "pointer" }}
@@ -272,7 +272,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   setOpenMenuId(dx < 0 ? r.id : null);
                 }}
                 onClick={() => { if (openMenuId === r.id) setOpenMenuId(null); }}
-                style={{ ...cardBase, borderLeft: "3px solid " + a, flex: 1, minWidth: 0, touchAction: "pan-y", transition: "border-radius 0.2s ease", ...(canReassign(r) && openMenuId === r.id ? { borderTopRightRadius: 0, borderBottomRightRadius: 0 } : {}) }}
+                style={{ ...cardBase, borderLeft: "3px solid " + a, flex: 1, minWidth: 0, touchAction: "pan-y", ...(canReassign(r) && openMenuId === r.id ? { borderTopRightRadius: 0, borderBottomRightRadius: 0 } : {}) }}
               >
              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
