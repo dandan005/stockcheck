@@ -241,7 +241,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
           const mine = user?.id === r.assigned_to;
           return (
             <div key={r.id} style={{ ...card, borderLeft: "3px solid " + a }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
                 {editingId === r.id ? (
                   <textarea
                     style={{ ...input, flex: 1, fontSize: 15, resize: "vertical", minHeight: 44 }}
