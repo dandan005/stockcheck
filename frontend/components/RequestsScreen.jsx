@@ -313,7 +313,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
               <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>
                 Created {new Date(r.created_at).toLocaleDateString()}
               </div>
-              {canReassign(r) ? (
+              {editingId === r.id ? (
                 <select
                   style={{ ...input, marginTop: 8, fontSize: 13, padding: "6px 10px", width: "auto", display: "inline-block", borderRadius: 999, background: "#1e293b" }}
                   value={r.assigned_to || ""}
