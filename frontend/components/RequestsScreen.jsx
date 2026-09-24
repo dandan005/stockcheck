@@ -272,7 +272,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   setOpenMenuId(dx < 0 ? r.id : null);
                 }}
                 onClick={() => { if (openMenuId === r.id) setOpenMenuId(null); }}
-                style={{ ...cardBase, borderLeft: "3px solid " + a, flex: 1, minWidth: 0, touchAction: "pan-y", ...(canReassign(r) && openMenuId === r.id ? { borderTopRightRadius: 0, borderBottomRightRadius: 0 } : {}) }}
+                style={{ ...cardBase, borderLeft: "3px solid " + a, flex: 1, minWidth: 0, touchAction: "pan-y", borderTopLeftRadius: card.borderRadius, borderBottomLeftRadius: card.borderRadius, borderTopRightRadius: canReassign(r) && openMenuId === r.id ? 0 : card.borderRadius, borderBottomRightRadius: canReassign(r) && openMenuId === r.id ? 0 : card.borderRadius }}
               >
              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
