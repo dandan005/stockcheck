@@ -241,18 +241,18 @@ export default function RequestsScreen({ user, onOpenCount }) {
           const mine = user?.id === r.assigned_to;
           const { margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, ...cardBase } = card;
           return (
-            <div key={r.id} style={{ position: "relative", overflow: "hidden", margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, borderRadius: card.borderRadius }}>
+            <div key={r.id} style={{ display: "flex", overflow: "hidden", margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, borderRadius: card.borderRadius }}>
               {canReassign(r) && (
-                <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: 132, display: "flex" }}>
+                <div style={{ order: 2, flex: "none", overflow: "hidden", display: "flex", width: canReassign(r) && openMenuId === r.id ? 132 : 0, transition: "width 0.2s ease" }}>
                   <button
                     onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
-                    style={{ flex: 1, border: "none", background: "#2563eb", color: "#fff", fontSize: 14, cursor: "pointer" }}
+                    style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#2563eb", color: "#fff", fontSize: 14, cursor: "pointer" }}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
-                    style={{ flex: 1, border: "none", background: "#dc2626", color: "#fff", fontSize: 14, cursor: "pointer" }}
+                    style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#dc2626", color: "#fff", fontSize: 14, cursor: "pointer" }}
                   >
                     Delete
                   </button>
@@ -272,7 +272,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   setOpenMenuId(dx < 0 ? r.id : null);
                 }}
                 onClick={() => { if (openMenuId === r.id) setOpenMenuId(null); }}
-                style={{ ...cardBase, borderLeft: "3px solid " + a, position: "relative", touchAction: "pan-y", transition: "transform 0.2s ease", transform: canReassign(r) && openMenuId === r.id ? "translateX(-132px)" : "translateX(0)" }}
+                style={{ ...cardBase, borderLeft: "3px solid " + a, flex: 1, minWidth: 0, touchAction: "pan-y", transition: "border-radius 0.2s ease", ...(canReassign(r) && openMenuId === r.id ? { borderTopRightRadius: 0, borderBottomRightRadius: 0 } : {}) }}
               >
              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
