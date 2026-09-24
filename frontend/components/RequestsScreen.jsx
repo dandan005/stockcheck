@@ -239,8 +239,41 @@ export default function RequestsScreen({ user, onOpenCount }) {
           const c = pill[r.status] || pill.open;
           const a = accent[r.status] || accent.open;
           const mine = user?.id === r.assigned_to;
+          const { margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, ...cardBase } = card;
           return (
-            <div key={r.id} style={{ ...card, borderLeft: "3px solid " + a }}>
+            <div key={r.id} style={{ position: "relative", overflow: "hidden", margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, borderRadius: card.borderRadius }}>
+              {canReassign(r) && (
+                <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: 132, display: "flex" }}>
+                  <button
+                    onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
+                    style={{ flex: 1, border: "none", background: "#2563eb", color: "#fff", fontSize: 14, cursor: "pointer" }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
+                    style={{ flex: 1, border: "none", background: "#dc2626", color: "#fff", fontSize: 14, cursor: "pointer" }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+              <div
+                onTouchStart={(e) => {
+                  e.currentTarget.dataset.sx = e.touches[0].clientX;
+                  e.currentTarget.dataset.sy = e.touches[0].clientY;
+                }}
+                onTouchEnd={(e) => {
+                  if (!canReassign(r) || editingId === r.id) return;
+                  const dx = e.changedTouches[0].clientX - Number(e.currentTarget.dataset.sx);
+                  const dy = e.changedTouches[0].clientY - Number(e.currentTarget.dataset.sy);
+                  if (isNaN(dx) || isNaN(dy)) return;
+                  if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+                  setOpenMenuId(dx < 0 ? r.id : null);
+                }}
+                onClick={() => { if (openMenuId === r.id) setOpenMenuId(null); }}
+                style={{ ...cardBase, borderLeft: "3px solid " + a, position: "relative", touchAction: "pan-y", transition: "transform 0.2s ease", transform: canReassign(r) && openMenuId === r.id ? "translateX(-132px)" : "translateX(0)" }}
+              >
              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
                 {editingId === r.id ? (
@@ -269,45 +302,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   >
                     {r.status.replace("_", " ")}
                   </span>
-                  {canReassign(r) && (
-                    <div style={{ position: "relative" }}>
-                      <button
-                        onClick={() => setOpenMenuId(openMenuId === r.id ? null : r.id)}
-                       style={{ ...smallBtn, padding: "4px 10px", borderRadius: 8, marginRight: -2 }}
-                      >
-                        ⋮
-                      </button>
-                      {openMenuId === r.id && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            right: 0,
-                            top: "110%",
-                            background: "#1e293b",
-                            border: "1px solid #334155",
-                            borderRadius: 8,
-                            overflow: "hidden",
-                            zIndex: 10,
-                            minWidth: 110,
-                          }}
-                        >
-                          <button
-                            onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
-                            style={{ display: "block", width: "100%", padding: "8px 12px", background: "none", border: "none", color: "#f8fafc", textAlign: "left", cursor: "pointer" }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
-                            style={{ display: "block", width: "100%", padding: "8px 12px", background: "none", border: "none", color: "#f87171", textAlign: "left", cursor: "pointer" }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                  </div>
               </div>
               {editingId === r.id && (
                 <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
@@ -355,6 +350,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   {rowError.message}
                 </div>
               )}
+            </div>
             </div>
           );
         })
