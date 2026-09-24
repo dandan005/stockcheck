@@ -423,3 +423,4 @@ if (adminClient && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 }
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
