@@ -1,6 +1,6 @@
 import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState, useRef } from "react";
-import { getRequests, createRequest, updateRequest, getCheckers, submitStatus, getChecksForRequest } from "../lib/api.js";
+import { getRequests, createRequest, updateRequest, deleteRequest, getCheckers, submitStatus, getChecksForRequest } from "../lib/api.js";
 import { usePendingChecks } from "../lib/offlineQueue.js";
 
 export default function RequestsScreen({ user, onOpenCount }) {
@@ -20,6 +20,8 @@ export default function RequestsScreen({ user, onOpenCount }) {
   const [assignedTo, setAssignedTo] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editNotes, setEditNotes] = useState("");
 
   const isAdmin = user?.role === "admin";
   const canCreate = isAdmin || user?.role === "requester";
@@ -84,6 +86,28 @@ export default function RequestsScreen({ user, onOpenCount }) {
     } catch (err) {
       showRowError(id, err.message);
       await load(); // roll back to server truth if the update genuinely failed
+    }
+  }
+
+  async function handleEditSave(id) {
+    setError("");
+    try {
+      await updateRequest(id, { notes: editNotes });
+      setEditingId(null);
+      await load();
+    } catch (err) {
+      showRowError(id, err.message);
+    }
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this request? This cannot be undone and will remove any item counts already logged against it.")) return;
+    setError("");
+    try {
+      await deleteRequest(id);
+      await load();
+    } catch (err) {
+      showRowError(id, err.message);
     }
   }
 
@@ -217,7 +241,15 @@ export default function RequestsScreen({ user, onOpenCount }) {
           return (
             <div key={r.id} style={{ ...card, borderLeft: "3px solid " + a }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                <strong style={{ fontSize: 16 }}>{r.notes || "Stock check"}</strong>
+                {editingId === r.id ? (
+                  <textarea
+                    style={{ ...input, flex: 1, fontSize: 15, resize: "vertical", minHeight: 44 }}
+                    value={editNotes}
+                    onChange={(e) => setEditNotes(e.target.value)}
+                  />
+                ) : (
+                  <strong style={{ fontSize: 16 }}>{r.notes || "Stock check"}</strong>
+                )}
                 <span
                   style={{
                     fontSize: 12,
@@ -231,6 +263,21 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   {r.status.replace("_", " ")}
                 </span>
               </div>
+              {canReassign(r) && (
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  {editingId === r.id ? (
+                    <>
+                      <button onClick={() => handleEditSave(r.id)} style={primaryBtn}>Save</button>
+                      <button onClick={() => setEditingId(null)} style={smallBtn}>Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); }} style={smallBtn}>Edit</button>
+                      <button onClick={() => handleDelete(r.id)} style={{ ...smallBtn, color: "#f87171", borderColor: "#7f1d1d" }}>Delete</button>
+                    </>
+                  )}
+                </div>
+              )}
               <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>
                 Created {new Date(r.created_at).toLocaleDateString()}
               </div>

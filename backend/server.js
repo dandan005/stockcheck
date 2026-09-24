@@ -303,6 +303,15 @@ app.put("/api/requests/:id", requireAuth, async (req, res) => {
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
+
+app.delete("/api/requests/:id", requireAuth, async (req, res) => {
+  const { error } = await req.supabase
+    .from("stock_check_requests")
+    .delete()
+    .eq("id", req.params.id);
+  if (error) return res.status(400).json({ error: error.message });
+  res.status(204).send();
+});
   res.json(data);
 });
 

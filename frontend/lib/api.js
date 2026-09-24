@@ -58,6 +58,10 @@ export async function updateRequest(id, patch) {
   })).json();
 }
 
+export async function deleteRequest(id) {
+  await apiFetch(`/api/requests/${id}`, { method: "DELETE" });
+}
+
 async function fetchChecks(requestId) {
   return (await apiFetch(`/api/requests/${requestId}/checks`)).json();
 }
