@@ -242,6 +242,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
           return (
             <div key={r.id} style={{ ...card, borderLeft: "3px solid " + a }}>
              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
                 {editingId === r.id ? (
                   <textarea
                     style={{ ...input, flex: 1, fontSize: 15, resize: "vertical", minHeight: 44 }}
@@ -251,6 +252,10 @@ export default function RequestsScreen({ user, onOpenCount }) {
                 ) : (
                   <strong style={{ fontSize: 16 }}>{r.notes || "Stock check"}</strong>
                 )}
+                  <div style={{ fontSize: 13, color: "#94a3b8" }}>
+                    Created {new Date(r.created_at).toLocaleDateString()}
+                  </div>
+                </div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <span
                     style={{
@@ -310,9 +315,6 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   <button onClick={() => setEditingId(null)} style={smallBtn}>Cancel</button>
                 </div>
               )}
-              <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>
-                Created {new Date(r.created_at).toLocaleDateString()}
-              </div>
               {editingId === r.id ? (
                 <select
                   style={{ ...input, marginTop: 8, fontSize: 13, padding: "6px 10px", width: "auto", display: "inline-block", borderRadius: 999, background: "#1e293b" }}
