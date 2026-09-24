@@ -268,7 +268,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                     <div style={{ position: "relative" }}>
                       <button
                         onClick={() => setOpenMenuId(openMenuId === r.id ? null : r.id)}
-                        style={{ ...smallBtn, padding: "4px 10px" }}
+                       style={{ ...smallBtn, padding: "4px 10px", borderRadius: 8, marginRight: -2 }}
                       >
                         ⋮
                       </button>
@@ -315,7 +315,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
               </div>
               {canReassign(r) ? (
                 <select
-                  style={{ ...input, marginTop: 8, fontSize: 13, padding: "6px 8px" }}
+                  style={{ ...input, marginTop: 8, fontSize: 13, padding: "6px 10px", width: "auto", display: "inline-block", borderRadius: 999, background: "#1e293b" }}
                   value={r.assigned_to || ""}
                   onChange={(e) => handleReassign(r.id, e.target.value)}
                 >
