@@ -246,7 +246,7 @@ export default function UsersScreen({ user }) {
                       </div>
                     )}
                   {swipeId === u.id && (
-                    <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                    <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
                       <button
                         onClick={() => { startEdit(u); setSwipeId(null); }}
                         style={{ ...smallBtn, background: "#2563eb", border: "none" }}

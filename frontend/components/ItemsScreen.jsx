@@ -305,7 +305,7 @@ export default function ItemsScreen({ user }) {
                     </>
                   )}
                 {isAdmin && swipeId === it.id && (
-                  <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                  <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
                     <button
                       onClick={() => { setError(""); setAssigningId(it.id); setSwipeId(null); }}
                       style={{ ...smallBtn, background: "#334155", border: "none" }}

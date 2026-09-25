@@ -331,7 +331,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                 </div>
               )}
             {canReassign(r) && openMenuId === r.id && (
-              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <div style={{ display: "flex", gap: 8, marginTop: 10, justifyContent: "flex-end" }}>
                 <button
                   onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
                   style={{ ...smallBtn, background: "#2563eb", border: "none" }}
