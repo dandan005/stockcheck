@@ -35,7 +35,10 @@ export default function ItemsScreen({ user }) {
     (async () => {
       const cached = await loadCachedItems();
       const hadCache = Boolean(cached && cached.length);
-      if (hadCache) setItems(cached);
+      if (hadCache) {
+        setItems(cached);
+        setLoading(false);
+      }
       load(!hadCache);
     })();
   }, []);

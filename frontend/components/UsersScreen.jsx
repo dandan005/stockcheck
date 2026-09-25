@@ -33,7 +33,10 @@ export default function UsersScreen({ user }) {
     (async () => {
       const cached = await loadKV("users");
       const hadCache = Boolean(cached);
-      if (hadCache) setUsers(cached);
+      if (hadCache) {
+        setUsers(cached);
+        setLoading(false);
+      }
       load(!hadCache);
     })();
   }, []);

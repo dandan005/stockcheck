@@ -48,6 +48,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
       const hadCache = Boolean(cr || cc);
       if (cr) setRequests(cr);
       if (cc) setCheckers(cc);
+      if (hadCache) setLoading(false);
       load(!hadCache);
     })();
   }, []);
