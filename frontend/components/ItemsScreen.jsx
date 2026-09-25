@@ -1,6 +1,7 @@
 import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState } from "react";
 import { getItems, createItem, updateItem, deleteItem } from "../lib/api.js";
+import { loadCachedItems } from "../lib/itemsCache.js";
 import BarcodeScanner from "./BarcodeScanner.jsx";
 
 export default function ItemsScreen({ user }) {
@@ -18,9 +19,9 @@ export default function ItemsScreen({ user }) {
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
-  async function load() {
-    setLoading(true);
+  async function load(showSpinner = true) {
     setError("");
+    if (showSpinner) setLoading(true);
     try {
       setItems(await getItems());
     } catch (err) {
@@ -31,7 +32,12 @@ export default function ItemsScreen({ user }) {
   }
 
   useEffect(() => {
-    load();
+    (async () => {
+      const cached = await loadCachedItems();
+      const hadCache = Boolean(cached && cached.length);
+      if (hadCache) setItems(cached);
+      load(!hadCache);
+    })();
   }, []);
 
   async function handleAdd(e) {

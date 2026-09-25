@@ -1,6 +1,7 @@
 import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUser, deleteUser } from "../lib/api.js";
+import { loadKV } from "../lib/itemsCache.js";
 
 const ROLES = ["admin", "requester", "checker"];
 
@@ -16,9 +17,9 @@ export default function UsersScreen({ user }) {
   const [deletingId, setDeletingId] = useState(null);
   const [addOpen, setAddOpen] = useState(false);
 
-  async function load() {
-    setLoading(true);
+  async function load(showSpinner = true) {
     setError("");
+    if (showSpinner) setLoading(true);
     try {
       setUsers(await getUsers());
     } catch (err) {
@@ -29,7 +30,12 @@ export default function UsersScreen({ user }) {
   }
 
   useEffect(() => {
-    load();
+    (async () => {
+      const cached = await loadKV("users");
+      const hadCache = Boolean(cached);
+      if (hadCache) setUsers(cached);
+      load(!hadCache);
+    })();
   }, []);
 
   async function handleAdd(e) {
