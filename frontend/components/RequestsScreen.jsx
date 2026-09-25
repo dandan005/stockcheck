@@ -330,7 +330,6 @@ export default function RequestsScreen({ user, onOpenCount }) {
                   {rowError.message}
                 </div>
               )}
-            </div>
             {canReassign(r) && openMenuId === r.id && (
               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 <button
@@ -347,6 +346,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                 </button>
               </div>
             )}
+            </div>
             </div>
           );
         })

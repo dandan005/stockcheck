@@ -304,9 +304,8 @@ export default function ItemsScreen({ user }) {
                       </div>
                     </>
                   )}
-                </div>
                 {isAdmin && swipeId === it.id && (
-                  <div style={{ display: "flex", gap: 8, padding: "0 12px 12px" }}>
+                  <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                     <button
                       onClick={() => { setError(""); setAssigningId(it.id); setSwipeId(null); }}
                       style={{ ...smallBtn, background: "#334155", border: "none" }}
@@ -328,6 +327,7 @@ export default function ItemsScreen({ user }) {
                     </button>
                   </div>
                 )}
+                </div>
               </li>
             ))}
           </ul>

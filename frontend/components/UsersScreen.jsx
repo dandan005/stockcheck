@@ -245,9 +245,8 @@ export default function UsersScreen({ user }) {
                         </span>
                       </div>
                     )}
-                  </div>
                   {swipeId === u.id && (
-                    <div style={{ display: "flex", gap: 8, padding: "0 12px 12px" }}>
+                    <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                       <button
                         onClick={() => { startEdit(u); setSwipeId(null); }}
                         style={{ ...smallBtn, background: "#2563eb", border: "none" }}
@@ -265,6 +264,7 @@ export default function UsersScreen({ user }) {
                       )}
                     </div>
                   )}
+                  </div>
                 </li>
               );
             })}
