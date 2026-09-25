@@ -18,6 +18,7 @@ export default function ItemsScreen({ user }) {
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [swipeId, setSwipeId] = useState(null);
 
   async function load(showSpinner = true) {
     setError("");
@@ -262,62 +263,83 @@ export default function ItemsScreen({ user }) {
           </div>
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {filteredItems.slice(0, visibleCount).map((it) => (
-              <li key={it.id} className="sc-card" style={{ padding: 12, marginBottom: 10 }}>
-                {editingId === it.id ? (
-                  <div style={{ display: "grid", gap: 6 }}>
-                    <input style={input} placeholder="SKU" value={editForm.sku}
-                      onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })} />
-                    <input style={input} placeholder="Name" value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
-                    <input style={input} placeholder="Barcode (optional)" value={editForm.barcode}
-                      onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })} />
-                    <input style={input} placeholder="Location (e.g. Ground floor, at the back of Bolton Bowl)" value={editForm.location}
-                      onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} />
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button
-                        onClick={() => handleSaveEdit(it.id)}
-                        disabled={savingEdit}
-                        style={{ ...smallBtn, background: "#2563eb", border: "none" }}
-                      >
-                        {savingEdit ? "Saving…" : "Save"}
-                      </button>
-                      <button onClick={cancelEdit} style={smallBtn}>
-                        Cancel
-                      </button>
-                    </div>
+              <li key={it.id} style={{ display: "flex", overflow: isAdmin && swipeId === it.id ? "hidden" : "visible", marginBottom: 10 }}>
+                {isAdmin && (
+                  <div style={{ order: 2, flex: "none", overflow: "hidden", display: swipeId === it.id ? "flex" : "none", width: swipeId === it.id ? 210 : 0 }}>
+                    <button
+                      onClick={() => { setError(""); setAssigningId(it.id); setSwipeId(null); }}
+                      style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#334155", color: "#fff", fontSize: 12 }}
+                    >
+                      {it.barcode ? "Change" : "Scan"}
+                    </button>
+                    <button
+                      onClick={() => { startEdit(it); setSwipeId(null); }}
+                      style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#2563eb", color: "#fff", fontSize: 13 }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => { setSwipeId(null); handleDelete(it); }}
+                      disabled={deletingId === it.id}
+                      style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#dc2626", color: "#fff", fontSize: 13 }}
+                    >
+                      {deletingId === it.id ? "…" : "Delete"}
+                    </button>
                   </div>
-                ) : (
-                  <>
-                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-                      <span style={chip}>{it.sku}</span>
-                      {it.barcode && <span style={tag}>barcode {it.barcode}</span>}
-                    </div>
-                    <div style={{ fontWeight: 700, fontSize: 15, margin: "8px 0 6px" }}>{it.name}</div>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      <span style={tag}>📍 {it.location || "no location"}</span>
-                    </div>
-                    {isAdmin && (
-                      <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                )}
+                <div
+                  className="sc-card"
+                  onTouchStart={(e) => {
+                    e.currentTarget.dataset.sx = e.touches[0].clientX;
+                    e.currentTarget.dataset.sy = e.touches[0].clientY;
+                  }}
+                  onTouchEnd={(e) => {
+                    if (!isAdmin || editingId === it.id) return;
+                    const dx = e.changedTouches[0].clientX - Number(e.currentTarget.dataset.sx);
+                    const dy = e.changedTouches[0].clientY - Number(e.currentTarget.dataset.sy);
+                    if (isNaN(dx) || isNaN(dy)) return;
+                    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+                    setSwipeId(dx < 0 ? it.id : null);
+                  }}
+                  onClick={() => { if (swipeId === it.id) setSwipeId(null); }}
+                  style={{ padding: 12, flex: 1, minWidth: 0, touchAction: "pan-y", borderTopRightRadius: isAdmin && swipeId === it.id ? 0 : 14, borderBottomRightRadius: isAdmin && swipeId === it.id ? 0 : 14 }}
+                >
+                  {editingId === it.id ? (
+                    <div style={{ display: "grid", gap: 6 }}>
+                      <input style={input} placeholder="SKU" value={editForm.sku}
+                        onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })} />
+                      <input style={input} placeholder="Name" value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                      <input style={input} placeholder="Barcode (optional)" value={editForm.barcode}
+                        onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })} />
+                      <input style={input} placeholder="Location (e.g. Ground floor, at the back of Bolton Bowl)" value={editForm.location}
+                        onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} />
+                      <div style={{ display: "flex", gap: 8 }}>
                         <button
-                          onClick={() => { setError(""); setAssigningId(it.id); }}
-                          style={smallBtn}
+                          onClick={() => handleSaveEdit(it.id)}
+                          disabled={savingEdit}
+                          style={{ ...smallBtn, background: "#2563eb", border: "none" }}
                         >
-                          {it.barcode ? "Change barcode" : "Scan barcode"}
+                          {savingEdit ? "Saving…" : "Save"}
                         </button>
-                        <button onClick={() => startEdit(it)} style={smallBtn}>
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(it)}
-                          disabled={deletingId === it.id}
-                          style={{ ...smallBtn, color: "#f87171", borderColor: "#7f1d1d" }}
-                        >
-                          {deletingId === it.id ? "Deleting…" : "Delete"}
+                        <button onClick={cancelEdit} style={smallBtn}>
+                          Cancel
                         </button>
                       </div>
-                    )}
-                  </>
-                )}
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                        <span style={chip}>{it.sku}</span>
+                        {it.barcode && <span style={tag}>barcode {it.barcode}</span>}
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: 15, margin: "8px 0 6px" }}>{it.name}</div>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <span style={tag}>📍 {it.location || "no location"}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

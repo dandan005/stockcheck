@@ -1,6 +1,6 @@
 {
   "name": "stockcheck-frontend",
-  "version": "0.3.27",
+  "version": "0.3.28",
   "description": "PWA frontend for the Stock Check app.",
   "scripts": {
     "dev": "vite",

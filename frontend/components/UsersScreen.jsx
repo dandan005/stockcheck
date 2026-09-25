@@ -15,6 +15,7 @@ export default function UsersScreen({ user }) {
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [swipeId, setSwipeId] = useState(null);
   const [addOpen, setAddOpen] = useState(false);
 
   async function load(showSpinner = true) {
@@ -171,31 +172,64 @@ export default function UsersScreen({ user }) {
               const rs = roleStyle[u.role] || roleStyle.requester;
               const name = u.full_name || u.email || "?";
               return (
-                <li key={u.id} className="sc-card" style={{ padding: 12, marginBottom: 10 }}>
-                  {editingId === u.id ? (
-                    <div style={{ display: "grid", gap: 6 }}>
-                      <div style={{ fontSize: 13, color: "#94a3b8", ...ellipsis }}>{u.email}</div>
-                      <input style={input} placeholder="Full name" value={editForm.fullName}
-                        onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} />
-                      <select style={input} value={editForm.role}
-                        onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
-                        {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-                      </select>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button
-                          onClick={() => handleSaveEdit(u.id)}
-                          disabled={savingEdit}
-                          style={{ ...smallBtn, background: "#2563eb", border: "none" }}
-                        >
-                          {savingEdit ? "Saving…" : "Save"}
-                        </button>
-                        <button onClick={cancelEdit} style={smallBtn}>
-                          Cancel
-                        </button>
+                <li key={u.id} style={{ display: "flex", overflow: swipeId === u.id ? "hidden" : "visible", marginBottom: 10 }}>
+                  <div style={{ order: 2, flex: "none", overflow: "hidden", display: swipeId === u.id ? "flex" : "none", width: swipeId === u.id ? (u.id !== user?.id ? 132 : 66) : 0 }}>
+                    <button
+                      onClick={() => { startEdit(u); setSwipeId(null); }}
+                      style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#2563eb", color: "#fff", fontSize: 14 }}
+                    >
+                      Edit
+                    </button>
+                    {u.id !== user?.id && (
+                      <button
+                        onClick={() => { setSwipeId(null); handleDelete(u); }}
+                        disabled={deletingId === u.id}
+                        style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#dc2626", color: "#fff", fontSize: 14 }}
+                      >
+                        {deletingId === u.id ? "…" : "Delete"}
+                      </button>
+                    )}
+                  </div>
+                  <div
+                    className="sc-card"
+                    onTouchStart={(e) => {
+                      e.currentTarget.dataset.sx = e.touches[0].clientX;
+                      e.currentTarget.dataset.sy = e.touches[0].clientY;
+                    }}
+                    onTouchEnd={(e) => {
+                      if (editingId === u.id) return;
+                      const dx = e.changedTouches[0].clientX - Number(e.currentTarget.dataset.sx);
+                      const dy = e.changedTouches[0].clientY - Number(e.currentTarget.dataset.sy);
+                      if (isNaN(dx) || isNaN(dy)) return;
+                      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+                      setSwipeId(dx < 0 ? u.id : null);
+                    }}
+                    onClick={() => { if (swipeId === u.id) setSwipeId(null); }}
+                    style={{ padding: 12, flex: 1, minWidth: 0, touchAction: "pan-y", borderTopRightRadius: swipeId === u.id ? 0 : 14, borderBottomRightRadius: swipeId === u.id ? 0 : 14 }}
+                  >
+                    {editingId === u.id ? (
+                      <div style={{ display: "grid", gap: 6 }}>
+                        <div style={{ fontSize: 13, color: "#94a3b8", ...ellipsis }}>{u.email}</div>
+                        <input style={input} placeholder="Full name" value={editForm.fullName}
+                          onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} />
+                        <select style={input} value={editForm.role}
+                          onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
+                          {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            onClick={() => handleSaveEdit(u.id)}
+                            disabled={savingEdit}
+                            style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                          >
+                            {savingEdit ? "Saving…" : "Save"}
+                          </button>
+                          <button onClick={cancelEdit} style={smallBtn}>
+                            Cancel
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <>
+                    ) : (
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                         <span
                           style={{
@@ -239,22 +273,8 @@ export default function UsersScreen({ user }) {
                           {u.role}
                         </span>
                       </div>
-                      <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                        <button onClick={() => startEdit(u)} style={smallBtn}>
-                          Edit
-                        </button>
-                        {u.id !== user?.id && (
-                          <button
-                            onClick={() => handleDelete(u)}
-                            disabled={deletingId === u.id}
-                            style={{ ...smallBtn, color: "#f87171", borderColor: "#7f1d1d" }}
-                          >
-                            {deletingId === u.id ? "Deleting…" : "Delete"}
-                          </button>
-                        )}
-                      </div>
-                    </>
-                  )}
+                    )}
+                  </div>
                 </li>
               );
             })}
