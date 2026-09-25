@@ -36,7 +36,7 @@ export default function ItemsScreen({ user }) {
       const cached = await loadCachedItems();
       const hadCache = Boolean(cached && cached.length);
       if (hadCache) {
-        setItems(cached);
+        setItems([...cached].sort((a, b) => (a.name || "").localeCompare(b.name || "")));
         setLoading(false);
       }
       load(!hadCache);
