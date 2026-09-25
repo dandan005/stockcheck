@@ -285,7 +285,7 @@ export default function SettingsScreen({ user, onReplayTour }) {
             textAlign: "center",
           }}
         >
-          ✨ Built solo, with <span style={{ color: "#fde9b8", fontWeight: 700 }}>Claude</span> as coding assistant.
+          ✨ Built solo by <span style={{ color: "#fde9b8", fontWeight: 700 }}>Daniel Cañete</span>, with <span style={{ color: "#fde9b8", fontWeight: 700 }}>Claude</span> as coding assistant.
         </div>
       </Card>
     </div>
