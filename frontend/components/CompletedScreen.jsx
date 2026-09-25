@@ -7,6 +7,7 @@ import {
   getChecksForRequest,
   createRequest,
 } from "../lib/api.js";
+import { loadKV } from "../lib/itemsCache.js";
 
 function toReportRows(checks) {
   return checks
@@ -59,6 +60,11 @@ export default function CompletedScreen({ user }) {
 
   useEffect(() => {
     (async () => {
+      const [cr, cc] = await Promise.all([loadKV("requests"), loadKV("checkers")]);
+      const hadCache = Boolean(cr || cc);
+      if (cr) setRequests(cr.filter((r) => r.status === "completed"));
+      if (cc) setCheckers(cc);
+      if (hadCache) setLoading(false);
       try {
         const [reqs, chk] = await Promise.all([getRequests(), getCheckers()]);
         setRequests(reqs.filter((r) => r.status === "completed"));
