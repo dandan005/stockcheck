@@ -1,6 +1,7 @@
 import LoadingCards from "./LoadingCards.jsx";
 import { useEffect, useState, useRef } from "react";
 import { getRequests, createRequest, updateRequest, deleteRequest, getCheckers, submitStatus, getChecksForRequest } from "../lib/api.js";
+import { loadKV } from "../lib/itemsCache.js";
 import { usePendingChecks } from "../lib/offlineQueue.js";
 
 export default function RequestsScreen({ user, onOpenCount }) {
@@ -27,9 +28,9 @@ export default function RequestsScreen({ user, onOpenCount }) {
   const isAdmin = user?.role === "admin";
   const canCreate = isAdmin || user?.role === "requester";
 
-  async function load() {
-    setLoading(true);
+  async function load(showSpinner = true) {
     setError("");
+    if (showSpinner) setLoading(true);
     try {
       const [reqs, checkerList] = await Promise.all([getRequests(), getCheckers()]);
       setRequests(reqs);
@@ -42,7 +43,13 @@ export default function RequestsScreen({ user, onOpenCount }) {
   }
 
   useEffect(() => {
-    load();
+    (async () => {
+      const [cr, cc] = await Promise.all([loadKV("requests"), loadKV("checkers")]);
+      const hadCache = Boolean(cr || cc);
+      if (cr) setRequests(cr);
+      if (cc) setCheckers(cc);
+      load(!hadCache);
+    })();
   }, []);
 
   async function handleCreate(e) {
@@ -53,7 +60,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
       await createRequest({ assignedTo: assignedTo || null, notes });
       setAssignedTo("");
       setNotes("");
-      await load();
+      await load(false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -86,7 +93,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
       await submitStatus(id, status);
     } catch (err) {
       showRowError(id, err.message);
-      await load(); // roll back to server truth if the update genuinely failed
+      await load(false); // roll back to server truth if the update genuinely failed
     }
   }
 
@@ -94,8 +101,8 @@ export default function RequestsScreen({ user, onOpenCount }) {
     setError("");
     try {
       await updateRequest(id, { notes: editNotes });
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, notes: editNotes } : r)));
       setEditingId(null);
-      await load();
     } catch (err) {
       showRowError(id, err.message);
     }
@@ -106,7 +113,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
     setError("");
     try {
       await deleteRequest(id);
-      await load();
+      setRequests((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
       showRowError(id, err.message);
     }
@@ -116,7 +123,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
     setError("");
     try {
       await updateRequest(id, { assignedTo: newAssignee || null });
-      await load();
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, assigned_to: newAssignee || null } : r)));
     } catch (err) {
       setError(err.message);
     }
