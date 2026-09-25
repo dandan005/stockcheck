@@ -172,40 +172,11 @@ export default function UsersScreen({ user }) {
               const rs = roleStyle[u.role] || roleStyle.requester;
               const name = u.full_name || u.email || "?";
               return (
-                <li key={u.id} style={{ display: "flex", overflow: swipeId === u.id ? "hidden" : "visible", marginBottom: 10 }}>
-                  <div style={{ order: 2, flex: "none", overflow: "hidden", display: swipeId === u.id ? "flex" : "none", width: swipeId === u.id ? (u.id !== user?.id ? 132 : 66) : 0 }}>
-                    <button
-                      onClick={() => { startEdit(u); setSwipeId(null); }}
-                      style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#2563eb", color: "#fff", fontSize: 14 }}
-                    >
-                      Edit
-                    </button>
-                    {u.id !== user?.id && (
-                      <button
-                        onClick={() => { setSwipeId(null); handleDelete(u); }}
-                        disabled={deletingId === u.id}
-                        style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#dc2626", color: "#fff", fontSize: 14 }}
-                      >
-                        {deletingId === u.id ? "…" : "Delete"}
-                      </button>
-                    )}
-                  </div>
+                <li key={u.id} style={{ marginBottom: 10 }}>
                   <div
                     className="sc-card"
-                    onTouchStart={(e) => {
-                      e.currentTarget.dataset.sx = e.touches[0].clientX;
-                      e.currentTarget.dataset.sy = e.touches[0].clientY;
-                    }}
-                    onTouchEnd={(e) => {
-                      if (editingId === u.id) return;
-                      const dx = e.changedTouches[0].clientX - Number(e.currentTarget.dataset.sx);
-                      const dy = e.changedTouches[0].clientY - Number(e.currentTarget.dataset.sy);
-                      if (isNaN(dx) || isNaN(dy)) return;
-                      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-                      setSwipeId(dx < 0 ? u.id : null);
-                    }}
-                    onClick={() => { if (swipeId === u.id) setSwipeId(null); }}
-                    style={{ padding: 12, flex: 1, minWidth: 0, touchAction: "pan-y", borderTopRightRadius: swipeId === u.id ? 0 : 14, borderBottomRightRadius: swipeId === u.id ? 0 : 14 }}
+                    onClick={() => { if (editingId !== u.id) setSwipeId(swipeId === u.id ? null : u.id); }}
+                    style={{ padding: 12 }}
                   >
                     {editingId === u.id ? (
                       <div style={{ display: "grid", gap: 6 }}>
@@ -275,6 +246,25 @@ export default function UsersScreen({ user }) {
                       </div>
                     )}
                   </div>
+                  {swipeId === u.id && (
+                    <div style={{ display: "flex", gap: 8, padding: "0 12px 12px" }}>
+                      <button
+                        onClick={() => { startEdit(u); setSwipeId(null); }}
+                        style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                      >
+                        Edit
+                      </button>
+                      {u.id !== user?.id && (
+                        <button
+                          onClick={() => { setSwipeId(null); handleDelete(u); }}
+                          disabled={deletingId === u.id}
+                          style={{ ...smallBtn, background: "#dc2626", border: "none" }}
+                        >
+                          {deletingId === u.id ? "…" : "Delete"}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </li>
               );
             })}

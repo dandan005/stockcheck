@@ -249,38 +249,10 @@ export default function RequestsScreen({ user, onOpenCount }) {
           const mine = user?.id === r.assigned_to;
           const { margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, ...cardBase } = card;
           return (
-            <div key={r.id} style={{ display: "flex", overflow: openMenuId === r.id && canReassign(r) ? "hidden" : "visible", margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, borderRadius: card.borderRadius }}>
-              {canReassign(r) && (
-                <div style={{ order: 2, flex: "none", overflow: "hidden", display: canReassign(r) && openMenuId === r.id ? "flex" : "none", width: 132 }}>
-                  <button
-                    onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
-                    style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#2563eb", color: "#fff", fontSize: 14, cursor: "pointer" }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
-                    style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#dc2626", color: "#fff", fontSize: 14, cursor: "pointer" }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
+            <div key={r.id} style={{ margin: cardMargin, marginTop: cardMT, marginBottom: cardMB, borderRadius: card.borderRadius }}>
               <div
-                onTouchStart={(e) => {
-                  e.currentTarget.dataset.sx = e.touches[0].clientX;
-                  e.currentTarget.dataset.sy = e.touches[0].clientY;
-                }}
-                onTouchEnd={(e) => {
-                  if (!canReassign(r) || editingId === r.id) return;
-                  const dx = e.changedTouches[0].clientX - Number(e.currentTarget.dataset.sx);
-                  const dy = e.changedTouches[0].clientY - Number(e.currentTarget.dataset.sy);
-                  if (isNaN(dx) || isNaN(dy)) return;
-                  if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-                  setOpenMenuId(dx < 0 ? r.id : null);
-                }}
-                onClick={() => { if (openMenuId === r.id) setOpenMenuId(null); }}
-                style={{ ...cardBase, borderLeft: "3px solid " + a, flex: 1, minWidth: 0, touchAction: "pan-y", borderTopLeftRadius: card.borderRadius, borderBottomLeftRadius: card.borderRadius, borderTopRightRadius: canReassign(r) && openMenuId === r.id ? 0 : card.borderRadius, borderBottomRightRadius: canReassign(r) && openMenuId === r.id ? 0 : card.borderRadius }}
+                onClick={() => { if (canReassign(r) && editingId !== r.id) setOpenMenuId(openMenuId === r.id ? null : r.id); }}
+                style={{ ...cardBase, borderLeft: "3px solid " + a, borderRadius: card.borderRadius }}
               >
              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
@@ -359,6 +331,22 @@ export default function RequestsScreen({ user, onOpenCount }) {
                 </div>
               )}
             </div>
+            {canReassign(r) && openMenuId === r.id && (
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button
+                  onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
+                  style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
+                  style={{ ...smallBtn, background: "#dc2626", border: "none" }}
+                >
+                  Delete
+                </button>
+              </div>
+            )}
             </div>
           );
         })

@@ -263,46 +263,11 @@ export default function ItemsScreen({ user }) {
           </div>
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {filteredItems.slice(0, visibleCount).map((it) => (
-              <li key={it.id} style={{ display: "flex", overflow: isAdmin && swipeId === it.id ? "hidden" : "visible", marginBottom: 10 }}>
-                {isAdmin && (
-                  <div style={{ order: 2, flex: "none", overflow: "hidden", display: swipeId === it.id ? "flex" : "none", width: swipeId === it.id ? 210 : 0 }}>
-                    <button
-                      onClick={() => { setError(""); setAssigningId(it.id); setSwipeId(null); }}
-                      style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#334155", color: "#fff", fontSize: 12 }}
-                    >
-                      {it.barcode ? "Change" : "Scan"}
-                    </button>
-                    <button
-                      onClick={() => { startEdit(it); setSwipeId(null); }}
-                      style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#2563eb", color: "#fff", fontSize: 13 }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => { setSwipeId(null); handleDelete(it); }}
-                      disabled={deletingId === it.id}
-                      style={{ flex: 1, minWidth: 66, whiteSpace: "nowrap", border: "none", background: "#dc2626", color: "#fff", fontSize: 13 }}
-                    >
-                      {deletingId === it.id ? "…" : "Delete"}
-                    </button>
-                  </div>
-                )}
+              <li key={it.id} style={{ marginBottom: 10 }}>
                 <div
                   className="sc-card"
-                  onTouchStart={(e) => {
-                    e.currentTarget.dataset.sx = e.touches[0].clientX;
-                    e.currentTarget.dataset.sy = e.touches[0].clientY;
-                  }}
-                  onTouchEnd={(e) => {
-                    if (!isAdmin || editingId === it.id) return;
-                    const dx = e.changedTouches[0].clientX - Number(e.currentTarget.dataset.sx);
-                    const dy = e.changedTouches[0].clientY - Number(e.currentTarget.dataset.sy);
-                    if (isNaN(dx) || isNaN(dy)) return;
-                    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-                    setSwipeId(dx < 0 ? it.id : null);
-                  }}
-                  onClick={() => { if (swipeId === it.id) setSwipeId(null); }}
-                  style={{ padding: 12, flex: 1, minWidth: 0, touchAction: "pan-y", borderTopRightRadius: isAdmin && swipeId === it.id ? 0 : 14, borderBottomRightRadius: isAdmin && swipeId === it.id ? 0 : 14 }}
+                  onClick={() => { if (isAdmin && editingId !== it.id) setSwipeId(swipeId === it.id ? null : it.id); }}
+                  style={{ padding: 12 }}
                 >
                   {editingId === it.id ? (
                     <div style={{ display: "grid", gap: 6 }}>
@@ -340,6 +305,29 @@ export default function ItemsScreen({ user }) {
                     </>
                   )}
                 </div>
+                {isAdmin && swipeId === it.id && (
+                  <div style={{ display: "flex", gap: 8, padding: "0 12px 12px" }}>
+                    <button
+                      onClick={() => { setError(""); setAssigningId(it.id); setSwipeId(null); }}
+                      style={{ ...smallBtn, background: "#334155", border: "none" }}
+                    >
+                      {it.barcode ? "Change" : "Scan"}
+                    </button>
+                    <button
+                      onClick={() => { startEdit(it); setSwipeId(null); }}
+                      style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => { setSwipeId(null); handleDelete(it); }}
+                      disabled={deletingId === it.id}
+                      style={{ ...smallBtn, background: "#dc2626", border: "none" }}
+                    >
+                      {deletingId === it.id ? "…" : "Delete"}
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
