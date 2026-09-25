@@ -167,7 +167,7 @@ export default function UsersScreen({ user }) {
         <>
           <div className="sc-label">{users.length} users</div>
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {users.map((u) => {
+            {[...users].sort((a, b) => ROLES.indexOf(a.role) - ROLES.indexOf(b.role)).map((u) => {
               const rs = roleStyle[u.role] || roleStyle.requester;
               const name = u.full_name || u.email || "?";
               return (
