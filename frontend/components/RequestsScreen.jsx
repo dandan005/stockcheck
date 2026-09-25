@@ -334,13 +334,13 @@ export default function RequestsScreen({ user, onOpenCount }) {
               <div style={{ display: "flex", gap: 8, marginTop: 10, justifyContent: "flex-end" }}>
                 <button
                   onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
-                  style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                  style={{ ...smallBtn, background: "#2563eb", border: "none", width: 70, textAlign: "center" }}
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
-                  style={{ ...smallBtn, background: "#dc2626", border: "none" }}
+                  style={{ ...smallBtn, background: "#dc2626", border: "none", width: 70, textAlign: "center" }}
                 >
                   Delete
                 </button>

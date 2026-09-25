@@ -249,7 +249,7 @@ export default function UsersScreen({ user }) {
                     <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
                       <button
                         onClick={() => { startEdit(u); setSwipeId(null); }}
-                        style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                        style={{ ...smallBtn, background: "#2563eb", border: "none", width: 70, textAlign: "center" }}
                       >
                         Edit
                       </button>
@@ -257,7 +257,7 @@ export default function UsersScreen({ user }) {
                         <button
                           onClick={() => { setSwipeId(null); handleDelete(u); }}
                           disabled={deletingId === u.id}
-                          style={{ ...smallBtn, background: "#dc2626", border: "none" }}
+                          style={{ ...smallBtn, background: "#dc2626", border: "none", width: 70, textAlign: "center" }}
                         >
                           {deletingId === u.id ? "…" : "Delete"}
                         </button>

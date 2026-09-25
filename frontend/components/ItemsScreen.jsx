@@ -308,20 +308,20 @@ export default function ItemsScreen({ user }) {
                   <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
                     <button
                       onClick={() => { setError(""); setAssigningId(it.id); setSwipeId(null); }}
-                      style={{ ...smallBtn, background: "#334155", border: "none" }}
+                      style={{ ...smallBtn, background: "#334155", border: "none", width: 70, textAlign: "center" }}
                     >
                       {it.barcode ? "Change" : "Scan"}
                     </button>
                     <button
                       onClick={() => { startEdit(it); setSwipeId(null); }}
-                      style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                      style={{ ...smallBtn, background: "#2563eb", border: "none", width: 70, textAlign: "center" }}
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => { setSwipeId(null); handleDelete(it); }}
                       disabled={deletingId === it.id}
-                      style={{ ...smallBtn, background: "#dc2626", border: "none" }}
+                      style={{ ...smallBtn, background: "#dc2626", border: "none", width: 70, textAlign: "center" }}
                     >
                       {deletingId === it.id ? "…" : "Delete"}
                     </button>
