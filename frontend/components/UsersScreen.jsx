@@ -108,7 +108,7 @@ export default function UsersScreen({ user }) {
   };
   const smallBtn = { ...input, padding: "7px 12px", fontSize: 13, cursor: "pointer" };
   const roleStyle = {
-    admin: { bg: "#3b0764", fg: "#d8b4fe" },
+    admin: { bg: "#78350f", fg: "#fcd34d" },
     requester: { bg: "#1e3a8a", fg: "#93c5fd" },
     checker: { bg: "#14532d", fg: "#86efac" },
   };
