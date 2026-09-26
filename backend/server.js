@@ -376,7 +376,7 @@ app.post("/api/push/subscribe", requireAuth, async (req, res) => {
   }
   const { error } = await req.supabase.from("push_subscriptions").upsert(
     { user_id: req.user.id, endpoint, p256dh: keys.p256dh, auth: keys.auth },
-    { onConflict: "endpoint" }
+    { onConflict: "user_id,endpoint" }
   );
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true });
