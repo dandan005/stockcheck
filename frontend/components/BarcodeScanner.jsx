@@ -140,6 +140,12 @@ export default function BarcodeScanner({ onScan, onClose, label }) {
           }}
         >
           <div id={SCANNER_ELEMENT_ID} style={{ width: "100%", height: "100%" }} />
+          <style>{`
+            #${SCANNER_ELEMENT_ID} div {
+              border: none !important;
+              box-shadow: none !important;
+            }
+          `}</style>
           <div
             style={{
               position: "absolute",
