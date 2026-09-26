@@ -140,7 +140,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
   };
 
   // Requesters can reassign only their own requests; admins can reassign any.
-  const visible = requests.filter((r) => r.status !== "completed");
+  const visible = requests.filter((r) => r.status !== "completed" && r.status !== "cancelled");
 
   function canReassign(r) {
     return isAdmin || (user?.role === "requester" && r.requested_by === user?.id);
@@ -338,12 +338,22 @@ export default function RequestsScreen({ user, onOpenCount }) {
                 >
                   Edit
                 </button>
-                <button
-                  onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
-                  style={{ ...smallBtn, background: "#dc2626", border: "none", width: 70, textAlign: "center" }}
-                >
-                  Delete
-                </button>
+                {r.status !== "in_progress" && (
+                  <button
+                    onClick={() => { setOpenMenuId(null); handleDelete(r.id); }}
+                    style={{ ...smallBtn, background: "#dc2626", border: "none", width: 70, textAlign: "center" }}
+                  >
+                    Delete
+                  </button>
+                )}
+                {r.status === "in_progress" && (
+                  <button
+                    onClick={() => { setOpenMenuId(null); handleStatus(r.id, "cancelled"); }}
+                    style={{ ...smallBtn, background: "#dc2626", border: "none", width: 70, textAlign: "center" }}
+                  >
+                    Cancel
+                  </button>
+                )}
               </div>
             )}
             </div>
