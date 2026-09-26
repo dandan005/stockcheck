@@ -101,7 +101,7 @@ export default function CountScreen({ request, onBack }) {
       <h2>Counting: {request.notes || "Stock check"}</h2>
 
       {scannerOpen ? (
-        <BarcodeScanner onScan={handleScan} onClose={() => setScannerOpen(false)} />
+        <BarcodeScanner onScan={handleScan} onClose={() => setScannerOpen(false)} label="Count" />
       ) : (
         <button onClick={() => setScannerOpen(true)}
           style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer", marginBottom: 12 }}>

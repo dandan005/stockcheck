@@ -227,7 +227,7 @@ export default function ItemsScreen({ user }) {
       {assigningItem && (
         <div className="sc-card" style={{ padding: 14, marginBottom: 12 }}>
           <p style={{ marginTop: 0 }}>Scan the barcode for <strong>{assigningItem.sku}</strong></p>
-          <BarcodeScanner onScan={handleAssign} onClose={() => setAssigningId(null)} />
+          <BarcodeScanner onScan={handleAssign} onClose={() => setAssigningId(null)} label="Items" />
         </div>
       )}
 
