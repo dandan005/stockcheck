@@ -193,7 +193,10 @@ export default function CompletedScreen({ user }) {
                         color: "#86efac",
                       }}
                     >
-                      completed
+                      {(() => {
+                        const n = r.items?.[0]?.count;
+                        return n == null ? "completed" : `${n} item${n === 1 ? "" : "s"} counted`;
+                      })()}
                     </span>
                     <span
                       style={{
