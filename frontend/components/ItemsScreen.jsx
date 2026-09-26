@@ -135,10 +135,10 @@ export default function ItemsScreen({ user }) {
 
   const input = {
     padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #334155",
-    background: "#1e293b",
-    color: "#f8fafc",
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.04)",
+    color: "#e8ecf2",
     fontSize: "15px",
   };
   const smallBtn = { ...input, padding: "7px 12px", fontSize: 13, cursor: "pointer" };
@@ -195,7 +195,7 @@ export default function ItemsScreen({ user }) {
               width: "100%",
               fontWeight: 600,
               cursor: "pointer",
-              background: addOpen ? "#1e293b" : "#2563eb",
+              background: addOpen ? "#1e293b" : "#3b5bdb",
               border: addOpen ? "1px solid #334155" : "none",
             }}
           >
@@ -216,7 +216,7 @@ export default function ItemsScreen({ user }) {
               <input style={input} placeholder="Location (e.g. Ground floor, at the back of Bolton Bowl)" value={form.location}
                   onChange={(e) => setForm({ ...form, location: e.target.value })} />
               <button type="submit" disabled={saving}
-                style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer" }}>
+                style={{ ...input, background: "#3b5bdb", border: "none", cursor: "pointer" }}>
                 {saving ? "Adding…" : "Save item"}
               </button>
             </form>
@@ -283,7 +283,7 @@ export default function ItemsScreen({ user }) {
                         <button
                           onClick={() => handleSaveEdit(it.id)}
                           disabled={savingEdit}
-                          style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                          style={{ ...smallBtn, background: "#3b5bdb", border: "none" }}
                         >
                           {savingEdit ? "Saving…" : "Save"}
                         </button>
@@ -314,7 +314,7 @@ export default function ItemsScreen({ user }) {
                     </button>
                     <button
                       onClick={() => { startEdit(it); setSwipeId(null); }}
-                      style={{ ...smallBtn, background: "#2563eb", border: "none", width: 70, textAlign: "center" }}
+                      style={{ ...smallBtn, background: "#3b5bdb", border: "none", width: 70, textAlign: "center" }}
                     >
                       Edit
                     </button>

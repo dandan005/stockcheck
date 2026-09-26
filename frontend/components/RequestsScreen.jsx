@@ -132,10 +132,10 @@ export default function RequestsScreen({ user, onOpenCount }) {
 
   const input = {
     padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #334155",
-    background: "#1e293b",
-    color: "#f8fafc",
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.04)",
+    color: "#e8ecf2",
     fontSize: "15px",
   };
 
@@ -164,7 +164,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
     marginBottom: 12,
   };
   const smallBtn = { ...input, padding: "8px 12px", fontSize: 14, cursor: "pointer" };
-  const primaryBtn = { ...smallBtn, background: "#2563eb", border: "none" };
+  const primaryBtn = { ...smallBtn, background: "#3b5bdb", border: "none" };
   const nameOf = (id) => checkers.find((c) => c.id === id)?.full_name || id;
   const [newRequestOpen, setNewRequestOpen] = useState(false);
 
@@ -181,7 +181,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
                 width: "100%",
                 fontWeight: 600,
                 cursor: "pointer",
-                background: newRequestOpen ? "#1e293b" : "#2563eb",
+                background: newRequestOpen ? "#1e293b" : "#3b5bdb",
                 border: newRequestOpen ? "1px solid #334155" : "none",
               }}
             >
@@ -334,7 +334,7 @@ export default function RequestsScreen({ user, onOpenCount }) {
               <div style={{ display: "flex", gap: 8, marginTop: 10, justifyContent: "flex-end" }}>
                 <button
                   onClick={() => { setEditingId(r.id); setEditNotes(r.notes || ""); setOpenMenuId(null); }}
-                  style={{ ...smallBtn, background: "#2563eb", border: "none", width: 70, textAlign: "center" }}
+                  style={{ ...smallBtn, background: "#3b5bdb", border: "none", width: 70, textAlign: "center" }}
                 >
                   Edit
                 </button>

@@ -168,7 +168,7 @@ export default function App() {
           padding: 16,
           paddingBottom: countRequest ? 16 : 100,
           minHeight: "100vh",
-          backgroundColor: "#0f172a",
+          backgroundColor: "#0d1526",
           backgroundImage:
             "repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px)",
           color: "#f8fafc",
@@ -217,7 +217,7 @@ export default function App() {
             right: 0,
             bottom: 0,
             display: "flex",
-            background: "linear-gradient(180deg, #0f172a, #0b1120)",
+            background: "linear-gradient(180deg, #111827, #0d1526)",
             borderTop: "1px solid #3b4670",
             paddingBottom: "env(safe-area-inset-bottom, 0px)",
             zIndex: 10,

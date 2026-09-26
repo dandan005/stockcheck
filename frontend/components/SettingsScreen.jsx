@@ -20,10 +20,10 @@ if (typeof window !== "undefined") {
 
 const input = {
   padding: "10px",
-  borderRadius: 8,
-  border: "1px solid #334155",
-  background: "#1e293b",
-  color: "#f8fafc",
+  borderRadius: 10,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.04)",
+  color: "#e8ecf2",
   fontSize: 15,
   width: "100%",
   boxSizing: "border-box",
@@ -34,7 +34,7 @@ const btn = {
   padding: "10px 14px",
   cursor: "pointer",
 };
-const primary = { ...btn, background: "#2563eb", border: "none" };
+const primary = { ...btn, background: "#3b5bdb", border: "none" };
 const muted = { color: "#94a3b8", fontSize: 13 };
 
 function Card({ title, children }) {
@@ -178,7 +178,7 @@ export default function SettingsScreen({ user, onReplayTour }) {
           <button
             onClick={enablePush}
             disabled={pushBusy}
-            style={{ ...input, width: "100%", fontWeight: 600, cursor: "pointer", background: "#2563eb", border: "none" }}
+            style={{ ...input, width: "100%", fontWeight: 600, cursor: "pointer", background: "#3b5bdb", border: "none" }}
           >
             {pushBusy ? "Enabling…" : "Enable notifications"}
           </button>

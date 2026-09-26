@@ -100,10 +100,10 @@ export default function UsersScreen({ user }) {
 
   const input = {
     padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #334155",
-    background: "#1e293b",
-    color: "#f8fafc",
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.04)",
+    color: "#e8ecf2",
     fontSize: "15px",
   };
   const smallBtn = { ...input, padding: "7px 12px", fontSize: 13, cursor: "pointer" };
@@ -125,7 +125,7 @@ export default function UsersScreen({ user }) {
               width: "100%",
               fontWeight: 600,
               cursor: "pointer",
-              background: addOpen ? "#1e293b" : "#2563eb",
+              background: addOpen ? "#1e293b" : "#3b5bdb",
               border: addOpen ? "1px solid #334155" : "none",
             }}
           >
@@ -148,7 +148,7 @@ export default function UsersScreen({ user }) {
                 {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
               <button type="submit" disabled={saving}
-                style={{ ...input, background: "#2563eb", border: "none", cursor: "pointer" }}>
+                style={{ ...input, background: "#3b5bdb", border: "none", cursor: "pointer" }}>
                 {saving ? "Creating…" : "Create user"}
               </button>
             </form>
@@ -191,7 +191,7 @@ export default function UsersScreen({ user }) {
                           <button
                             onClick={() => handleSaveEdit(u.id)}
                             disabled={savingEdit}
-                            style={{ ...smallBtn, background: "#2563eb", border: "none" }}
+                            style={{ ...smallBtn, background: "#3b5bdb", border: "none" }}
                           >
                             {savingEdit ? "Saving…" : "Save"}
                           </button>
@@ -249,7 +249,7 @@ export default function UsersScreen({ user }) {
                     <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
                       <button
                         onClick={() => { startEdit(u); setSwipeId(null); }}
-                        style={{ ...smallBtn, background: "#2563eb", border: "none", width: 70, textAlign: "center" }}
+                        style={{ ...smallBtn, background: "#3b5bdb", border: "none", width: 70, textAlign: "center" }}
                       >
                         Edit
                       </button>
