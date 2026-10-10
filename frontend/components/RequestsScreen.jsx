@@ -140,7 +140,9 @@ export default function RequestsScreen({ user, onOpenCount }) {
   };
 
   // Requesters can reassign only their own requests; admins can reassign any.
-  const visible = requests.filter((r) => r.status !== "completed" && r.status !== "cancelled");
+  const visible = requests
+    .filter((r) => r.status !== "completed" && r.status !== "cancelled")
+    .sort((a, b) => Number(b.status === "in_progress") - Number(a.status === "in_progress"));
 
   function canReassign(r) {
     return isAdmin || (user?.role === "requester" && r.requested_by === user?.id);

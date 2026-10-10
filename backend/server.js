@@ -401,8 +401,8 @@ if (adminClient && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
               keys: { p256dh: sub.p256dh, auth: sub.auth },
             };
             const payloadStr = JSON.stringify({
-              title: "Stock Check",
-              body: notif.message,
+              title: "Stock Check update",
+              body: notif.message || "You have a new update. Open Stock Check for details.",
               url: "/",
             });
             webpush.sendNotification(subscription, payloadStr).catch(async (err) => {
@@ -423,4 +423,3 @@ if (adminClient && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 }
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-

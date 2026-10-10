@@ -6,9 +6,9 @@ self.addEventListener("push", (event) => {
     data = { title: "Stock Check", body: event.data ? event.data.text() : "" };
   }
 
-  const title = data.title || "Stock Check";
+  const title = data.title || "Stock Check update";
   const options = {
-    body: data.body || "",
+    body: data.body || "You have a new update. Open Stock Check for details.",
     icon: "/icons/icon-192.png",
     badge: "/icons/badge-96.png",
     data: { url: data.url || "/" },
